@@ -2,6 +2,7 @@
 # You can delete these comments, but do not change the name of this file
 # Write your code to expect a terminal of 80 characters wide and 24 rows high
 from re import findall
+from random import randint, choice
 
 ships = {
   "carrier" : 5,
@@ -25,13 +26,18 @@ states = {
   "miss": "O"
 }
 
-user_board = []
-computer_board = []
+boards = {
+  "user" : [],
+  "computer": []
+}
 
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
 
 def display_rules():
+  """
+  Show all the rules at the beginning of the game.
+  """
   input("""
 Welcome to BATTLESHIP!
         
@@ -144,11 +150,16 @@ def implement_direction(board, starting_square, direction, legitimate_directions
     board.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "ship"])
   
 
-def place_ships():
+def place_ships(user):
   """
-  Loops through the five available ships and lets the player place them on the grid.
+  When user is set to True, loops through the available ships and
+  lets the user set them up on their board.
+
+  When user is set to False, automatically generates the board
+  setup for the computer.
   """
-  input(
+  if user:
+    input(
 """
 Start by placing your ships. You can do so by first entering a point
 on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
@@ -158,24 +169,30 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
   for ship in ships:
     got_input = False
     while not(got_input):
-      print_board(user_board)
-      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]}\n")
+      if user:
+        print_board(boards["user"])
+      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]}\n") if user else [ randint(0, 7), randint(0, 7) ]
       try:
-        starting_square = parse_input(starting_square)
-        legitimate_directions = find_legitimate_directions(user_board, starting_square, ships[ship])
+        if user:
+          starting_square = parse_input(starting_square)
+        legitimate_directions = find_legitimate_directions(boards["user"] if user else boards["computer"], starting_square, ships[ship])
       except Exception as e:
-        input(e)
+        if user:
+          input(e)
         continue
 
       got_orientation = False
       while not(got_orientation):
         try:
-          print_board(showDirections(user_board, starting_square, legitimate_directions, ships[ship]))
-          chosenDirection = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}\n")
-          implement_direction(user_board, starting_square, chosenDirection, legitimate_directions, ships[ship])
+          if user:
+            print_board(showDirections(boards["user"] if user else boards["computer"], starting_square, legitimate_directions, ships[ship]))
+          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}\n") if user else choice(legitimate_directions)
+          implement_direction(boards["user"] if user else boards["computer"], starting_square, chosen_direction, legitimate_directions, ships[ship])
           got_orientation = True
         except Exception as e:
-          print(e)
+          if user:
+            print(e)
+          continue
 
       got_input = True 
 
@@ -184,6 +201,7 @@ def main():
   Runs all of the programme functionality.
   """
   display_rules()
-  place_ships()
+  place_ships(user=True)
+  place_ships(user=False)
 
 main()
