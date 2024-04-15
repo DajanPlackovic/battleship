@@ -215,13 +215,12 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
-def check_hit(target, user):
+def check_hit(target, target_board):
   """
   Check if the target was hit, update the board accordingly.
   
   Raise error if user retargets same spot.
   """
-  target_board = boards["computer"] if user else boards["user"]
   row, column = target
 
   target_match = [ index for index, point in enumerate(target_board) if point[0] == row and point[1] == column ]
@@ -242,22 +241,24 @@ Yikes! Better luck next time...
  ⏎
 """
 
-  print_board(target_board)
-  input(message)
+  return message
 
 def turn(user):
+    target_board = boards["computer"] if user else boards["user"]
     got_input = False
     while not got_input:
-      print_board(boards["computer"]) # add opponent later
+      print_board(target_board, user)
       target = input("""
 Enter a field you would like to target. ⇒
 """)
       try:
         target = parse_input(target)
-        check_hit(target, user)
+        message = check_hit(target, target_board)
         got_input = True
       except Exception as e:
         input(e)
+    print_board(target_board, user)
+    input(message)
   
 def game_loop():
   while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
