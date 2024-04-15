@@ -18,6 +18,9 @@ columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
 
 def validateInput(input):
+  """
+  Validates the input of a square for placing ships or targeting enemy ships.
+  """
   processedInput = input.strip().replace(" ","")
   print(processedInput)
   try:
@@ -37,6 +40,9 @@ def validateInput(input):
     raise ValueError(f"Input not accepted: {e}\n\nPress any key to try again.\n")
 
 def printBoard(board):
+  """
+  Prints current state of the board with columns and rows indicated.
+  """
   for idx in range(len(board)):
     print('  '.join([str(idx + 1), ' '.join(board[idx])]))
   print('   ' + ' '.join([ str(letter) for letter in columns ]))
@@ -66,7 +72,7 @@ Press any key to continue.
 
 def main():
   """
-  Runs all of the programme functionality in a single app.
+  Runs all of the programme functionality.
   """
   placeShips()
 
