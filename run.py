@@ -131,7 +131,10 @@ def showDirections(board, starting_square, legitimate_directions, ship_length):
 
   return board_orientation
 
-def implementDirection(board, starting_square, direction, legitimate_directions, ship_length):
+def implement_direction(board, starting_square, direction, legitimate_directions, ship_length):
+  """
+  Accept direction input if legitimate, throw error if not legitimate.
+  """
   if not(direction in legitimate_directions):
     raise ValueError("Not one of the possible directions.")
   
@@ -169,7 +172,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
         try:
           print_board(showDirections(user_board, starting_square, legitimate_directions, ships[ship]))
           chosenDirection = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}\n")
-          implementDirection(user_board, starting_square, chosenDirection, legitimate_directions, ships[ship])
+          implement_direction(user_board, starting_square, chosenDirection, legitimate_directions, ships[ship])
           got_orientation = True
         except Exception as e:
           print(e)
