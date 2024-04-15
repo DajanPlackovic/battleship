@@ -214,18 +214,27 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
       got_input = True 
 
 
+# game_loop and subfunctions
 def check_hit(target, user):
+  """
+  Check if the target was hit, update the board accordingly.
+  
+  Raise error if user retargets same spot.
+  """
   target_board = boards["computer"] if user else boards["user"]
   row, column = target
 
   target_match = [ index for index, point in enumerate(target_board) if point[0] == row and point[1] == column ]
 
-  if len(target_match) and target_board[target_match[0]][2] == "ship":
-    target_board[target_match[0]][2] = "hit"
-    message = """
+  if len(target_match):
+    if target_board[target_match[0]][2] == "ship":
+      target_board[target_match[0]][2] = "hit"
+      message = """
 Nice! You got one!
  ⏎
 """
+    else:
+      raise ValueError("You already targeted that spot! Pick another one.")
   else:
     target_board.append([row, column, "miss"])
     message = """
@@ -236,7 +245,6 @@ Yikes! Better luck next time...
   print_board(target_board)
   input(message)
 
-# game_loop and subfunctions
 def turn(user):
     got_input = False
     while not got_input:
@@ -246,16 +254,14 @@ Enter a field you would like to target. ⇒
 """)
       try:
         target = parse_input(target)
+        check_hit(target, user)
         got_input = True
       except Exception as e:
         input(e)
-    
-    check_hit(target, user)
-    print_board(boards["computer"])
   
-# def game_loop():
-#   while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
-    # turn(user=True)
+def game_loop():
+  while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
+    turn(user=True)
     # turn(user=False)
 
 def main():
@@ -267,7 +273,7 @@ def main():
   # print_board(boards["user"])
   place_ships(user=False)
   # print_board(boards["computer"])
-  # game_loop()
-  turn(user=True)
+  game_loop()
+  # turn(user=True)
 
 main()
