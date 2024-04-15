@@ -155,7 +155,7 @@ def implement_direction(board, starting_square, direction, legitimate_directions
   """
   Accept direction input if legitimate, throw error if not legitimate.
   """
-  if not(direction in legitimate_directions):
+  if not(direction.upper() in legitimate_directions):
     raise ValueError("Not one of the possible directions.")
   
   row, column = starting_square
