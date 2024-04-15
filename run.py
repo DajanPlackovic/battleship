@@ -67,7 +67,6 @@ Press any key to continue.
         gotInput = True
       except Exception as e:
         input(e)
-        gotInput = False
 
 def main():
   """
