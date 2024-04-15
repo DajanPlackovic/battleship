@@ -11,15 +11,16 @@ ships = {
   "destroyer": 2
 }
 
-userBoard = [['·'] * 8] * 8
-computerBoard = [['·'] * 8] * 8
+userBoard = [ list(['·'] * 8) for i in range(8) ]
+computerBoard = [ list(['·'] * 8) for i in range(8) ]
 
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
 
-def validateInput(input):
+def parseInput(input):
   """
-  Validates the input of a square for placing ships or targeting enemy ships.
+  Parses the input of a square for placing ships or targeting enemy ships.
+  If the input is not valid, returns a ValueError.
   """
   processedInput = input.strip().replace(" ","")
   try:
@@ -35,6 +36,8 @@ def validateInput(input):
     if len(row) < 1:
       raise ValueError(f"Input string should contain exactly one reference\nto row (a number from 1 to 8).\n")
     
+    return [ int(row[0]) - 1, columns.index(column[0]) ]
+  
   except Exception as e:
     raise ValueError(f"Input not accepted: {e}\n\nPress any key to try again.\n")
 
