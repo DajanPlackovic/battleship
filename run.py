@@ -11,6 +11,13 @@ ships = {
   "destroyer": 2
 }
 
+directions = {
+  "N": [-1, 0],
+  "S": [1, 0],
+  "W": [0, -1],
+  "E" : [0, 1]
+}
+
 userBoard = [ list(['·'] * 8) for i in range(8) ]
 computerBoard = [ list(['·'] * 8) for i in range(8) ]
 
@@ -49,6 +56,37 @@ def printBoard(board):
     print('  '.join([str(idx + 1), ' '.join(board[idx])]))
   print('   ' + ' '.join([ str(letter) for letter in columns ]))
 
+def findLegitimateDirections(board, startingSquare, shipLength):
+  """
+  Returns legitimate orientations for placing the ships, that do not go
+  out of bounds or intersect an already placed ship.
+  """
+  legitimateDirections = []
+  row, column = startingSquare
+
+  if row > shipLength - 1:
+    legitimateDirections.append('N')
+  if row < 7 - shipLength:
+    legitimateDirections.append('S')
+  if column > shipLength - 1:
+    legitimateDirections.append('W')
+  if column < 7 - shipLength:
+    legitimateDirections.append('E')
+
+  return legitimateDirections
+
+def showDirections(board, startingSquare, legitimateDirections, shipLength):
+  """
+  Displays the available orientations when placing ships.
+  """
+  row, column = startingSquare
+  boardDisplay = [ row[:] for row in board ]
+  boardDisplay[row][column] = "■"
+  for direction in legitimateDirections:
+    for idx in range(1, shipLength):
+      boardDisplay[row + idx * directions[direction][0]][column + idx * directions[direction][1]] = "□"
+  return boardDisplay
+
 def placeShips():
   """
   Loops through the five available ships and lets the player place them on the grid.
@@ -66,10 +104,14 @@ Press any key to continue.
       printBoard(userBoard)
       startingSquare = input(f"Place the {ship.capitalize()}: Length {ships[ship]}\n")
       try:
-        validateInput(startingSquare)
+        startingSquare = parseInput(startingSquare)
         gotInput = True
       except Exception as e:
         input(e)
+        continue
+      legitimateDirections = findLegitimateDirections(userBoard, startingSquare, ships[ship])
+      print(legitimateDirections)
+      printBoard(showDirections(userBoard, startingSquare, legitimateDirections, ships[ship]))
 
 def main():
   """
