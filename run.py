@@ -31,6 +31,17 @@ computer_board = []
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
 
+def display_rules():
+  input("""
+Welcome to BATTLESHIP!
+        
+Whenever you see the symbol at the bottom of this message, press any key to continue.
+        
+⏎
+""")
+
+# place_ships and its subfunctions
+
 def parse_input(input):
   """
   Parses the input of a square for placing ships or targeting enemy ships.
@@ -53,7 +64,7 @@ def parse_input(input):
     return [ int(row[0]) - 1, columns.index(column[0]) ]
   
   except Exception as e:
-    raise ValueError(f"Input not accepted: {e}\n\nPress any key to try again.\n")
+    raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
 
 def print_board(board):
   """
@@ -101,7 +112,7 @@ def find_legitimate_directions(board, starting_square, ship_length):
         
 
   if len(legitimate_directions) == 0:
-    raise ValueError("Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.\n\nPress any key to try again.")
+    raise ValueError("Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.\n\n⏎")
   
   return legitimate_directions
 
@@ -139,7 +150,7 @@ def place_ships():
 Start by placing your ships. You can do so by first entering a point
 on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
-Press any key to continue.
+⏎
 """)
   for ship in ships:
     got_input = False
@@ -169,6 +180,7 @@ def main():
   """
   Runs all of the programme functionality.
   """
+  display_rules()
   place_ships()
 
 main()
