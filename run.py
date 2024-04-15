@@ -62,17 +62,27 @@ def findLegitimateDirections(board, startingSquare, shipLength):
   out of bounds or intersect an already placed ship.
   """
   legitimateDirections = []
-  row, column = startingSquare
 
-  if row > shipLength - 1:
-    legitimateDirections.append('N')
-  if row < 7 - shipLength:
-    legitimateDirections.append('S')
-  if column > shipLength - 1:
-    legitimateDirections.append('W')
-  if column < 7 - shipLength:
-    legitimateDirections.append('E')
+  for direction in directions:
+    importantDimension = startingSquare[0 if directions[direction][0] == 0 else 1]
+    if sum(directions[direction]) == 1 and importantDimension < 7 - shipLength:
+      legitimateDirections.append(direction)
+    if sum(directions[direction]) == -1 and importantDimension > shipLength -1:
+      legitimateDirections.append(direction)
 
+
+  # if row > shipLength - 1:
+  #   legitimateDirections.append('N')
+  # if row < 7 - shipLength:
+  #   legitimateDirections.append('S')
+  # if column > shipLength - 1:
+  #   legitimateDirections.append('W')
+  # if column < 7 - shipLength:
+  #   legitimateDirections.append('E')
+
+  if len(legitimateDirections) == 0:
+    raise ValueError("Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.\n\nPress any key to try again.")
+  
   return legitimateDirections
 
 def showDirections(board, startingSquare, legitimateDirections, shipLength):
