@@ -3,6 +3,8 @@
 # Write your code to expect a terminal of 80 characters wide and 24 rows high
 from re import findall
 
+counter = 0
+
 ships = {
   "carrier" : 5,
   "battleship": 4,
@@ -18,8 +20,15 @@ directions = {
   "E" : [0, 1]
 }
 
-userBoard = [ list(['·'] * 8) for i in range(8) ]
-computerBoard = [ list(['·'] * 8) for i in range(8) ]
+states = {
+  "ship": "■",
+  "orient": "□",
+  "hit": "X",
+  "miss": "O"
+}
+
+userBoard = []
+computerBoard = []
 
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
@@ -52,8 +61,13 @@ def printBoard(board):
   """
   Prints current state of the board with columns and rows indicated.
   """
-  for idx in range(len(board)):
-    print('  '.join([str(idx + 1), ' '.join(board[idx])]))
+  boardDisplay = [ list(['·'] * 8) for i in range(8) ]
+  for point in board:
+    row, column, state = point
+    boardDisplay[row][column] = states[state]
+
+  for idx in range(len(boardDisplay)):
+    print('  '.join([str(idx + 1), ' '.join(boardDisplay[idx])]))
   print('   ' + ' '.join([ str(letter) for letter in columns ]))
 
 def findLegitimateDirections(board, startingSquare, shipLength):
@@ -62,23 +76,32 @@ def findLegitimateDirections(board, startingSquare, shipLength):
   out of bounds or intersect an already placed ship.
   """
   legitimateDirections = []
+  row, column = startingSquare
 
   for direction in directions:
-    importantDimension = startingSquare[0 if directions[direction][0] == 0 else 1]
-    if sum(directions[direction]) == 1 and importantDimension < 7 - shipLength:
-      legitimateDirections.append(direction)
-    if sum(directions[direction]) == -1 and importantDimension > shipLength -1:
-      legitimateDirections.append(direction)
+    rowMod = directions[direction][0]
+    colMod = directions[direction][1]
 
+    counter = 0
+                        
+    for idx in range(shipLength):
+      newRow = row + idx * rowMod
+      if not(0 <= newRow <= 7):
+        continue
 
-  # if row > shipLength - 1:
-  #   legitimateDirections.append('N')
-  # if row < 7 - shipLength:
-  #   legitimateDirections.append('S')
-  # if column > shipLength - 1:
-  #   legitimateDirections.append('W')
-  # if column < 7 - shipLength:
-  #   legitimateDirections.append('E')
+      newCol = column + idx * colMod
+      if not(0 <= newCol <= 7):
+        continue
+
+      if True in (point[0] == newRow and point[1] == newCol for point in board):
+        continue
+      
+      counter += 1
+    
+    print(counter)
+    if counter == shipLength:
+        legitimateDirections.append(direction)
+        
 
   if len(legitimateDirections) == 0:
     raise ValueError("Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.\n\nPress any key to try again.")
@@ -90,12 +113,15 @@ def showDirections(board, startingSquare, legitimateDirections, shipLength):
   Displays the available orientations when placing ships.
   """
   row, column = startingSquare
-  boardDisplay = [ row[:] for row in board ]
-  boardDisplay[row][column] = "■"
+
+  boardOrientation = board[:]
+  boardOrientation.append([row, column, "ship"])
+
   for direction in legitimateDirections:
     for idx in range(1, shipLength):
-      boardDisplay[row + idx * directions[direction][0]][column + idx * directions[direction][1]] = "□"
-  return boardDisplay
+      boardOrientation.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "orient"])
+
+  return boardOrientation
 
 def implementDirection(board, startingSquare, direction, legitimateDirections, shipLength):
   if not(direction in legitimateDirections):
@@ -104,7 +130,7 @@ def implementDirection(board, startingSquare, direction, legitimateDirections, s
   row, column = startingSquare
   
   for idx in range(shipLength):
-    board[row + idx * directions[direction][0]][column + idx * directions[direction][1]] = "■"
+    board.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "ship"])
   
 
 def placeShips():
