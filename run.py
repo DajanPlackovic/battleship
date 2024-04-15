@@ -28,12 +28,12 @@ def validateInput(input):
     
     column = findall(f"[{''.join(columns)}]", input.upper())
     
-    if len(column) > 1:
-      raise ValueError("Input string should contain exactly one reference\nto column (a letter from A to H or a to h).")
+    if len(column) < 1:
+      raise ValueError(f"Input string should contain exactly one reference\nto column (a letter from A to H or a to h).\n")
     
     row = findall(f"[{''.join(rows)}]", input)
-    if len(row) > 1:
-      raise ValueError("Input string should contain exactly one reference\nto row (a number between 1 and 8)")
+    if len(row) < 1:
+      raise ValueError(f"Input string should contain exactly one reference\nto row (a number from 1 to 8).\n")
     
   except Exception as e:
     raise ValueError(f"Input not accepted: {e}\n\nPress any key to try again.\n")
