@@ -45,6 +45,20 @@ Whenever you see the symbol at the bottom of this message, press any key to cont
         
 ⏎
 """)
+  
+  input_test = input("""
+Whenever you instead see the symbol below, you will be asked to input something.
+        
+Type anything in and press Enter. Just don't leave it blank. ⇒
+""")
+  
+  while len(input_test) == 0:
+    input_test = input("""
+See, that's the one thing that won't work. When you see the ⇒ arrow, you gotta type something.
+                       
+Try again ⇒
+""")
+  
 
 # place_ships and its subfunctions
 
@@ -171,7 +185,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
     while not(got_input):
       if user:
         print_board(boards["user"])
-      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]}\n") if user else [ randint(0, 7), randint(0, 7) ]
+      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]} ⇒\n") if user else [ randint(0, 7), randint(0, 7) ]
       try:
         if user:
           starting_square = parse_input(starting_square)
@@ -186,7 +200,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
         try:
           if user:
             print_board(showDirections(boards["user"] if user else boards["computer"], starting_square, legitimate_directions, ships[ship]))
-          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}\n") if user else choice(legitimate_directions)
+          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user else choice(legitimate_directions)
           implement_direction(boards["user"] if user else boards["computer"], starting_square, chosen_direction, legitimate_directions, ships[ship])
           got_orientation = True
         except Exception as e:
