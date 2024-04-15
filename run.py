@@ -22,7 +22,6 @@ def validateInput(input):
   Validates the input of a square for placing ships or targeting enemy ships.
   """
   processedInput = input.strip().replace(" ","")
-  print(processedInput)
   try:
     if (len(processedInput) > 2):
         raise ValueError(f"Input can contain only two characters (a letter A-H and a number 1-8) and spaces.\nInput contains {len(processedInput)} characters.")
