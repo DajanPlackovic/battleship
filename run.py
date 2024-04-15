@@ -86,13 +86,15 @@ def parse_input(input):
   except Exception as e:
     raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
 
-def print_board(board):
+def print_board(board, opponent=False):
   """
   Prints current state of the board with columns and rows indicated.
   """
   board_display = [ list(['·'] * 8) for i in range(8) ]
   for point in board:
     row, column, state = point
+    if opponent and state == "ship":
+      continue
     board_display[row][column] = states[state]
 
   for idx in range(len(board_display)):
