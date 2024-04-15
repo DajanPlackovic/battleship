@@ -234,7 +234,7 @@ Nice! You got one!
  ⏎
 """
     else:
-      raise ValueError("You already targeted that spot! Pick another one.")
+      raise ValueError("You already targeted that spot! Pick another one.\n\n⏎")
   else:
     target_board.append([row, column, "miss"])
     message = """
