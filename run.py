@@ -167,7 +167,7 @@ def implement_direction(board, starting_square, direction, legitimate_directions
     board.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "ship"])
   
 
-def place_ships(user):
+def place_ships(user, test=False):
   """
   When user is set to True, loops through the available ships and
   lets the user set them up on their board.
@@ -175,7 +175,7 @@ def place_ships(user):
   When user is set to False, automatically generates the board
   setup for the computer.
   """
-  if user:
+  if user and not test:
     input(
 """
 Start by placing your ships. You can do so by first entering a point
@@ -186,39 +186,46 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
   for ship in ships:
     got_input = False
     while not(got_input):
-      if user:
+      if user and not test:
         print_board(boards["user"])
-      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]} ⇒\n") if user else [ randint(0, 7), randint(0, 7) ]
+      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]} ⇒\n") if user and not test else [ randint(0, 7), randint(0, 7) ]
       try:
-        if user:
+        if user and not test:
           starting_square = parse_input(starting_square)
         legitimate_directions = find_legitimate_directions(boards["user"] if user else boards["computer"], starting_square, ships[ship])
       except Exception as e:
-        if user:
+        if user and not test:
           input(e)
         continue
 
       got_orientation = False
       while not(got_orientation):
         try:
-          if user:
+          if user and not test:
             print_board(showDirections(boards["user"] if user else boards["computer"], starting_square, legitimate_directions, ships[ship]))
-          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user else choice(legitimate_directions)
+          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user and not test else choice(legitimate_directions)
           implement_direction(boards["user"] if user else boards["computer"], starting_square, chosen_direction, legitimate_directions, ships[ship])
           got_orientation = True
         except Exception as e:
-          if user:
+          if user and not test:
             print(e)
           continue
 
       got_input = True 
 
+# game_loop and subfunctions
+def game_loop():
+  print("works")
+
 def main():
   """
   Runs all of the programme functionality.
   """
-  display_rules()
-  place_ships(user=True)
+  # display_rules()
+  place_ships(user=True, test=True)
+  print_board(boards["user"])
   place_ships(user=False)
+  print_board(boards["computer"])
+  game_loop()
 
 main()
