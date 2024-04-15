@@ -87,6 +87,16 @@ def showDirections(board, startingSquare, legitimateDirections, shipLength):
       boardDisplay[row + idx * directions[direction][0]][column + idx * directions[direction][1]] = "□"
   return boardDisplay
 
+def implementDirection(board, startingSquare, direction, legitimateDirections, shipLength):
+  if not(direction in legitimateDirections):
+    raise ValueError("Not one of the possible directions.")
+  
+  row, column = startingSquare
+  
+  for idx in range(shipLength):
+    board[row + idx * directions[direction][0]][column + idx * directions[direction][1]] = "■"
+  
+
 def placeShips():
   """
   Loops through the five available ships and lets the player place them on the grid.
@@ -105,13 +115,22 @@ Press any key to continue.
       startingSquare = input(f"Place the {ship.capitalize()}: Length {ships[ship]}\n")
       try:
         startingSquare = parseInput(startingSquare)
-        gotInput = True
+        legitimateDirections = findLegitimateDirections(userBoard, startingSquare, ships[ship])
       except Exception as e:
         input(e)
         continue
-      legitimateDirections = findLegitimateDirections(userBoard, startingSquare, ships[ship])
-      print(legitimateDirections)
-      printBoard(showDirections(userBoard, startingSquare, legitimateDirections, ships[ship]))
+
+      gotOrientation = False
+      while not(gotOrientation):
+        try:
+          printBoard(showDirections(userBoard, startingSquare, legitimateDirections, ships[ship]))
+          chosenDirection = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimateDirections)}\n")
+          implementDirection(userBoard, startingSquare, chosenDirection, legitimateDirections, ships[ship])
+          gotOrientation = True
+        except Exception as e:
+          print(e)
+
+      gotInput = True 
 
 def main():
   """
