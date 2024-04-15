@@ -215,7 +215,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
-def check_hit(target, target_board):
+def check_hit(target, target_board, user):
   """
   Check if the target was hit, update the board accordingly.
   
@@ -227,10 +227,15 @@ def check_hit(target, target_board):
 
   if len(target_match):
     if target_board[target_match[0]][2] == "ship":
+      if not user:
+        input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
       target_board[target_match[0]][2] = "hit"
       message = """
 Nice! You got one!
  ⏎
+""" if user else """
+Nice! I got you!
+⏎
 """
     else:
       raise ValueError("You already targeted that spot! Pick another one.\n\n⏎")
@@ -239,6 +244,9 @@ Nice! You got one!
     message = """
 Yikes! Better luck next time...
  ⏎
+""" if user else """
+Damn! I'm sure I was close.
+⏎
 """
 
   return message
@@ -250,20 +258,22 @@ def turn(user):
       print_board(target_board, user)
       target = input("""
 Enter a field you would like to target. ⇒
-""")
+""") if user else [randint(0, 7), randint(0, 7)]
       try:
-        target = parse_input(target)
-        message = check_hit(target, target_board)
+        if user:
+          target = parse_input(target)
+        message = check_hit(target, target_board, user)
         got_input = True
       except Exception as e:
-        input(e)
+        if user:
+          input(e)
     print_board(target_board, user)
     input(message)
   
 def game_loop():
   while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
     turn(user=True)
-    # turn(user=False)
+    turn(user=False)
 
 def main():
   """
