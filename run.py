@@ -16,7 +16,7 @@ directions = {
   "N": [-1, 0],
   "S": [1, 0],
   "W": [0, -1],
-  "E" : [0, 1]
+  "E": [0, 1]
 }
 
 states = {
@@ -34,6 +34,7 @@ class Board():
   A dictionary with coordinate tuplets as keys, field states as values
   and methods that allow actions upon the board.
   """
+
   def __init__(self, user = True, state = None):
     self.state = state if state else {}
     for i in range(8):
@@ -57,6 +58,7 @@ class Board():
     """
     board_display = [ list(['·'] * 8) for i in range(8) ]
     for point in self.state:
+  
       if self.opponent and self.state[point] == "ship":
         continue
       row, column = point
@@ -150,7 +152,8 @@ class Board():
       case "ship":
         if not self.opponent:
           input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
-        self.state[(row, column)] = "hit"
+        self.update_point((row, column), "hit")
+        self.ship_count -= 1
 
         message = """
   Nice! You got one!
@@ -162,7 +165,7 @@ class Board():
       case "unmarked":
         if not self.opponent:
           input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
-        self.state[(row, column)] = "miss"
+        self.update_point((row, column), "miss")
 
         message = """
     Yikes! Better luck next time...
@@ -174,6 +177,29 @@ class Board():
 
     return message
   
+  def find_longest_chain_ends(self, starting_point):
+    chain_ends = {}
+    
+    for direction in directions:
+      chain_end = starting_point
+      end = False
+      while not end:
+        try:
+          if self.state[(chain_end[0] + directions[direction][0], chain_end[1] + directions[direction][1])] == "hit":
+            chain_end = (chain_end[0] + directions[direction][0], chain_end[1] + directions[direction][1])
+          else:
+            end = True
+        except:
+          end = True
+      chain_ends[direction] = chain_end
+
+    chain_orientation = "NS"
+    chain_endpoints = { "N" : chain_ends["N"], "S" : chain_ends["S"] }# save NS chain as longest
+    if chain_ends["E"][0] - chain_ends["W"][0] > chain_ends["S"][0] - chain_ends["N"][0]:
+      chain_orientation = "WE",
+      chain_endpoints = { "W" : chain_ends["W"], "E" : chain_ends["E"] } # if WE is longer, replace it
+    print(chain_endpoints)
+    return chain_orientation, chain_endpoints
 
 boards = {
   "user" : Board(),
@@ -284,18 +310,30 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
+def computer_choose_target():
+  board = boards["user"]
+  last_move = board.last_move
+  random_choice = [randint(0,7), randint(0,7)]
 
+  hits = [ point for point in board.state if board.state[point] == "hit" ]
+  
+  if not last_move or len(hits) == 0: # if it's our first move or if we haven't hit anything yet, choose randomly
+    return random_choice
+  
+  if last_move[1] == "hit":
+    chain_orientation, chain_endpoints = board.find_longest_chain_ends(last_move[0])
+    direction = choice(chain_orientation)
+    return [chain_endpoints[direction][0] + directions[direction][0], chain_endpoints[direction][1] + directions[direction][1]]
+
+  
+  if last_move[1] == "miss":
+    starter = choice(hits)
+    direction = choice([ direction for direction in directions.values() ])
+    return [ starter[0] + direction[0], starter[1] + direction[1] ]
+
+  return [ randint(0,7), randint(0,7) ]
 
 def game_loop():
-  def computer_choose_target():
-    # already_hit = [point for point in boards["user"] if point[2] == "hit"]
-    
-    # if len(already_hit) == 0:
-      return [ randint(0,7), randint(0,7) ]
-    
-    # last_hit = already_hit[-1]
-        
-
   def turn(user):
     global prior_outcome
     target_board = boards["computer"] if user else boards["user"]
@@ -318,7 +356,7 @@ Enter a field you would like to target. ⇒
     input(message)
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    turn(user=True)
+    # turn(user=True)
     turn(user=False)
 
 def main():
@@ -330,5 +368,14 @@ def main():
   place_ships(user=False)
   # print(boards["computer"].ship_count)
   game_loop()
+  # boards['user'].update_point((0,0), "hit")
+  # boards['user'].update_point((0,1), "hit")
+  # boards['user'].update_point((0,2), "hit")
+  # boards['user'].update_point((0,3), "hit")
+  # boards['user'].update_point((1,0), "hit")
+  # boards['user'].update_point((2,0), "hit")
+  # boards['user'].update_point((3,0), "hit")
+  # boards['user'].find_longest_chain_ends((0,0))
+
 
 main()
