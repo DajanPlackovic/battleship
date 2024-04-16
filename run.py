@@ -42,6 +42,7 @@ class Board():
     
     self.last_move = None
     self.opponent = not user
+    self.ship_count = sum(ships.values())
   
   def update_point(self, coordinates, new_state):
     """
@@ -130,6 +131,48 @@ class Board():
     
     for idx in range(ships[ship]):
       self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])] = "ship"
+
+  def check_hit(self, target):
+    """
+    Check if the target was hit, update the board accordingly.
+    
+    Raise error if user retargets same spot.
+    """
+    row, column = target
+
+    retarget_error = ValueError("You already targeted that spot! Pick another one.\n\n⏎")
+
+    match self.state[(row, column)]:
+      case "hit":
+        raise retarget_error
+      case "miss":
+        raise retarget_error
+      case "ship":
+        if not self.opponent:
+          input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
+        self.state[(row, column)] = "hit"
+
+        message = """
+  Nice! You got one!
+  ⏎
+  """ if self.opponent else """
+  Nice! I got you!
+  ⏎
+  """
+      case "unmarked":
+        if not self.opponent:
+          input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
+        self.state[(row, column)] = "miss"
+
+        message = """
+    Yikes! Better luck next time...
+    ⏎
+    """ if self.opponent else """
+    Damn! I'm sure I was close.
+    ⏎
+    """
+
+    return message
   
 
 boards = {
@@ -192,11 +235,6 @@ def parse_input(input):
   except Exception as e:
     raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
 
-
-
-
-  
-
 def place_ships(user, test=False):
   board = boards["user"] if user else boards["computer"]
   """
@@ -246,49 +284,9 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
-def check_hit(target, target_board, user):
-  """
-  Check if the target was hit, update the board accordingly.
-  
-  Raise error if user retargets same spot.
-  """
-  row, column = target
-
-  target_match = [ index for index, point in enumerate(target_board) if point[0] == row and point[1] == column ]
-
-  if len(target_match):
-    if target_board[target_match[0]][2] == "ship":
-      if not user:
-        input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
-      del target_board[target_match[0]]
-      target_board.append([row, column, "hit"])
-      message = """
-Nice! You got one!
- ⏎
-""" if user else """
-Nice! I got you!
-⏎
-"""
-    else:
-      raise ValueError("You already targeted that spot! Pick another one.\n\n⏎")
-  else:
-    target_board.append([row, column, "miss"])
-    if not user:
-      input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
-    message = """
-Yikes! Better luck next time...
- ⏎
-""" if user else """
-Damn! I'm sure I was close.
-⏎
-"""
-
-  return message
 
 
 def game_loop():
-  computer_ship_tracker = ships.copy()
-
   def computer_choose_target():
     # already_hit = [point for point in boards["user"] if point[2] == "hit"]
     
@@ -303,24 +301,24 @@ def game_loop():
     target_board = boards["computer"] if user else boards["user"]
     got_input = False
     while not got_input:
-      print_board(target_board, user)
+      target_board.display_board()
       target = input("""
 Enter a field you would like to target. ⇒
 """) if user else computer_choose_target()
       try:
         if user:
           target = parse_input(target)
-        message = check_hit(target, target_board, user)
+        message = target_board.check_hit(target)
         got_input = True
       except Exception as e:
         if user:
           input(e)
-    print_board(target_board, user)
+    target_board.display_board()
   
-  input(message)
+    input(message)
   
-  while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
-    # turn(user=True)
+  while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
+    turn(user=True)
     turn(user=False)
 
 def main():
@@ -330,6 +328,7 @@ def main():
   # display_rules()
   place_ships(user=True, test=True)
   place_ships(user=False)
-  # game_loop()
+  # print(boards["computer"].ship_count)
+  game_loop()
 
 main()
