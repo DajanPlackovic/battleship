@@ -225,11 +225,14 @@ def check_hit(target, target_board, user):
 
   target_match = [ index for index, point in enumerate(target_board) if point[0] == row and point[1] == column ]
 
+  new_state = "miss"
+
   if len(target_match):
     if target_board[target_match[0]][2] == "ship":
       if not user:
         input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
-      target_board[target_match[0]][2] = "hit"
+      new_state = "hit"
+      target_board[target_match[0]][2] = new_state
       message = """
 Nice! You got one!
  ⏎
@@ -240,7 +243,9 @@ Nice! I got you!
     else:
       raise ValueError("You already targeted that spot! Pick another one.\n\n⏎")
   else:
-    target_board.append([row, column, "miss"])
+    target_board.append([row, column, new_state])
+    if not user:
+      input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
     message = """
 Yikes! Better luck next time...
  ⏎
@@ -251,14 +256,21 @@ Damn! I'm sure I was close.
 
   return message
 
-def turn(user):
+
+def game_loop():
+  def computer_choose_target():
+    return [ randint(0,7), randint(0,7) ]
+        
+
+  def turn(user):
+    global prior_outcome
     target_board = boards["computer"] if user else boards["user"]
     got_input = False
     while not got_input:
       print_board(target_board, user)
       target = input("""
 Enter a field you would like to target. ⇒
-""") if user else [randint(0, 7), randint(0, 7)]
+""") if user else computer_choose_target()
       try:
         if user:
           target = parse_input(target)
@@ -269,10 +281,8 @@ Enter a field you would like to target. ⇒
           input(e)
     print_board(target_board, user)
     input(message)
-  
-def game_loop():
   while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
-    turn(user=True)
+    # turn(user=True)
     turn(user=False)
 
 def main():
@@ -281,10 +291,7 @@ def main():
   """
   # display_rules()
   place_ships(user=True, test=True)
-  # print_board(boards["user"])
   place_ships(user=False)
-  # print_board(boards["computer"])
   game_loop()
-  # turn(user=True)
 
 main()
