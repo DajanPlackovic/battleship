@@ -23,12 +23,53 @@ states = {
   "ship": "■",
   "orient": "□",
   "hit": "X",
-  "miss": "O"
+  "miss": "O",
+  "unmarked": "·"
 }
 
+class Board():
+  """
+  Initalizes a board:
+  
+  A dictionary with coordinate tuplets as keys, field states as values
+  and methods that allow actions upon the board.
+  """
+  def __init__(self, user = True, state = None):
+    self.state = state if state else {}
+    for i in range(8):
+      for j in range(8):
+        self.state[(i, j)] = "unmarked"
+    
+    self.last_move = None
+    self.opponent = not user
+  
+  def update_point(self, coordinates, new_state):
+    """
+    Updates the state of a point and saves that state as the last move.
+    """
+    self.state[coordinates] = new_state
+    self.last_move = (coordinates, new_state)
+
+  def display_board(self):
+    """
+    Prints current state of the board with columns and rows indicated.
+    """
+    board_display = [ list(['·'] * 8) for i in range(8) ]
+    for point in self.state:
+      if self.opponent and self.state[point] == "ship":
+        continue
+      row, column = point
+      board_display[row][column] = states[self.state[point]]
+
+    for idx in range(len(board_display)):
+      print('  '.join([str(idx + 1), ' '.join(board_display[idx])]))
+    print('   ' + ' '.join([ str(letter) for letter in columns ]))
+
+  
+
 boards = {
-  "user" : [],
-  "computer": []
+  "user" : Board(),
+  "computer": Board()
 }
 
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -86,21 +127,6 @@ def parse_input(input):
   except Exception as e:
     raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
 
-def print_board(board, opponent=False):
-  """
-  Prints current state of the board with columns and rows indicated.
-  """
-  board_display = [ list(['·'] * 8) for i in range(8) ]
-  for point in board:
-    row, column, state = point
-    if opponent and state == "ship":
-      continue
-    board_display[row][column] = states[state]
-
-  for idx in range(len(board_display)):
-    print('  '.join([str(idx + 1), ' '.join(board_display[idx])]))
-  print('   ' + ' '.join([ str(letter) for letter in columns ]))
-
 def find_legitimate_directions(board, starting_square, ship_length):
   """
   Returns legitimate orientations for placing the ships, that do not go
@@ -124,7 +150,7 @@ def find_legitimate_directions(board, starting_square, ship_length):
       if not(0 <= new_col <= 7):
         continue
 
-      if True in (point[0] == new_row and point[1] == new_col for point in board):
+      if board.state[(row, column)] != "unmarked":
         continue
       
       counter += 1
@@ -144,14 +170,15 @@ def showDirections(board, starting_square, legitimate_directions, ship_length):
   """
   row, column = starting_square
 
-  board_orientation = board[:]
-  board_orientation.append([row, column, "ship"])
+  board_orientation = Board(board.state)
+  board_orientation.state[(row, column)] = "ship"
 
   for direction in legitimate_directions:
     for idx in range(1, ship_length):
-      board_orientation.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "orient"])
+      board_orientation.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])] = "orient"
 
-  return board_orientation
+  board_orientation.display_board()
+
 
 def implement_direction(board, starting_square, direction, legitimate_directions, ship_length):
   """
@@ -164,7 +191,7 @@ def implement_direction(board, starting_square, direction, legitimate_directions
   row, column = starting_square
   
   for idx in range(ship_length):
-    board.append([row + idx * directions[direction][0], column + idx * directions[direction][1], "ship"])
+    board.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])] = "ship"
   
 
 def place_ships(user, test=False):
@@ -187,7 +214,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
     got_input = False
     while not(got_input):
       if user and not test:
-        print_board(boards["user"])
+        boards["user"].display_board()
       starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]} ⇒\n") if user and not test else [ randint(0, 7), randint(0, 7) ]
       try:
         if user and not test:
@@ -202,7 +229,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
       while not(got_orientation):
         try:
           if user and not test:
-            print_board(showDirections(boards["user"] if user else boards["computer"], starting_square, legitimate_directions, ships[ship]))
+            showDirections(boards["user"] if user else boards["computer"], starting_square, legitimate_directions, ships[ship])
           chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user and not test else choice(legitimate_directions)
           implement_direction(boards["user"] if user else boards["computer"], starting_square, chosen_direction, legitimate_directions, ships[ship])
           got_orientation = True
@@ -281,6 +308,7 @@ Enter a field you would like to target. ⇒
           input(e)
     print_board(target_board, user)
     input(message)
+  
   while sum(point[2] == 'ship' for point in boards['computer']) > 0 and sum(point[2] == 'ship' for point in boards['user']) > 0:
     # turn(user=True)
     turn(user=False)
@@ -290,8 +318,12 @@ def main():
   Runs all of the programme functionality.
   """
   # display_rules()
-  place_ships(user=True, test=True)
-  place_ships(user=False)
-  game_loop()
+  # place_ships(user=True, test=True)
+  # place_ships(user=False)
+  # game_loop()
+  place_ships(user=True)
+  boards["user"].update_point((0,0), "ship")
+  boards["user"].display_board()
+  showDirections(boards["user"], (0,0), ["S", "E"], 5)
 
 main()
