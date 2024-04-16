@@ -134,7 +134,7 @@ class Board():
 
 boards = {
   "user" : Board(),
-  "computer": Board()
+  "computer": Board(user=False)
 }
 
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -328,15 +328,8 @@ def main():
   Runs all of the programme functionality.
   """
   # display_rules()
-  # place_ships(user=True, test=True)
-  # place_ships(user=False)
+  place_ships(user=True, test=True)
+  place_ships(user=False)
   # game_loop()
-  place_ships(user=True)
-  # boards["user"].update_point((0,0), "ship")
-  # boards["user"].display_board()
-  # showDirections(boards["user"], (0,0), ["S", "E"], 5)
-  # boards["user"].show_directions((0,0), ["S", "E"], "carrier")
-  # boards["user"].implement_direction((0,0), "S", ["S"], "carrier")
-  # boards["user"].display_board()
 
 main()
