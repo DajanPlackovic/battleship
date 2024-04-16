@@ -42,6 +42,7 @@ class Board():
         self.state[(i, j)] = "unmarked"
     
     self.last_move = None
+    self.hit_chains = []
     self.opponent = not user
     self.ship_count = sum(ships.values())
   
@@ -178,23 +179,28 @@ class Board():
     return message
   
   def find_longest_chain_ends(self, starting_point):
-    chain_ends = {}
+    chain_ends = { direction: starting_point for direction in directions.keys() }
+    chain_lengths = { direction: 0 for direction in directions.keys() }
     
     for direction in directions:
-      chain_end = starting_point
       end = False
       while not end:
+        next_point = (chain_ends[direction][0] + directions[direction][0], chain_ends[direction][1] + directions[direction][1])
         try:
-          if self.state[(chain_end[0] + directions[direction][0], chain_end[1] + directions[direction][1])] == "hit":
-            chain_end = (chain_end[0] + directions[direction][0], chain_end[1] + directions[direction][1])
+          if self.state[next_point] == "hit":
+            chain_ends[direction] = next_point
+            chain_lengths[direction] += 1
+          elif self.state[next_point] == "miss":
+            chain_ends[direction] = None
+            end = True
           else:
             end = True
         except:
           end = True
-      chain_ends[direction] = chain_end
 
-    chain_orientation = "NS"
-    chain_endpoints = { "N" : chain_ends["N"], "S" : chain_ends["S"] }# save NS chain as longest
+    if chain_lengths["N"] + chain_lengths["S"] == chain_lengths["W"] + chain_lengths["E"]:
+      chain_orientation = choice(("NS", "WE"))
+      chain_endpoints = { "N" : chain_ends["N"], "S" : chain_ends["S"] }# save NS chain as longest
     if chain_ends["E"][0] - chain_ends["W"][0] > chain_ends["S"][0] - chain_ends["N"][0]:
       chain_orientation = "WE",
       chain_endpoints = { "W" : chain_ends["W"], "E" : chain_ends["E"] } # if WE is longer, replace it
@@ -250,11 +256,11 @@ def parse_input(input):
     column = findall(f"[{''.join(columns)}]", input.upper())
     
     if len(column) < 1:
-      raise ValueError(f"Input string should contain exactly one reference\nto column (a letter from A to H or a to h).\n")
+      raise ValueError(f"Input string should contain exactly one reference\nto a column (a letter from A to H or a to h).\n")
     
     row = findall(f"[{''.join(rows)}]", input)
     if len(row) < 1:
-      raise ValueError(f"Input string should contain exactly one reference\nto row (a number from 1 to 8).\n")
+      raise ValueError(f"Input string should contain exactly one reference\nto a row (a number from 1 to 8).\n")
     
     return [ int(row[0]) - 1, columns.index(column[0]) ]
   
@@ -322,16 +328,11 @@ def computer_choose_target():
   
   if last_move[1] == "hit":
     chain_orientation, chain_endpoints = board.find_longest_chain_ends(last_move[0])
-    direction = choice(chain_orientation)
-    return [chain_endpoints[direction][0] + directions[direction][0], chain_endpoints[direction][1] + directions[direction][1]]
+  else:
+    chain_orientation,chain_endpoints = board.find_longest_chain_ends(choice(hits))
 
-  
-  if last_move[1] == "miss":
-    starter = choice(hits)
-    direction = choice([ direction for direction in directions.values() ])
-    return [ starter[0] + direction[0], starter[1] + direction[1] ]
-
-  return [ randint(0,7), randint(0,7) ]
+  direction = choice(chain_orientation)
+  return [chain_endpoints[direction][0] + directions[direction][0], chain_endpoints[direction][1] + directions[direction][1]]
 
 def game_loop():
   def turn(user):
@@ -367,7 +368,7 @@ def main():
   place_ships(user=True, test=True)
   place_ships(user=False)
   # print(boards["computer"].ship_count)
-  game_loop()
+  # game_loop()
   # boards['user'].update_point((0,0), "hit")
   # boards['user'].update_point((0,1), "hit")
   # boards['user'].update_point((0,2), "hit")
