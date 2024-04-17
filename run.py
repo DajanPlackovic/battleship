@@ -146,6 +146,13 @@ class Board():
       self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
 
   def update_chains(self, starting_point, new_state):
+    """
+    Updates the info about chains of hits in the user's board
+    after the computer makes its move.
+
+    This info is later used by the computer to decide on its
+    next move.
+    """
     row, column = starting_point
     this_point = self.state[(row, column)]
     for direction in directions:
@@ -230,35 +237,6 @@ class Board():
 
     return message
   
-  def find_longest_chain_ends(self, starting_point):
-    chain_ends = { direction: starting_point for direction in directions.keys() }
-    chain_lengths = { direction: 0 for direction in directions.keys() }
-    
-    for direction in directions:
-      end = False
-      while not end:
-        next_point = (chain_ends[direction][0] + directions[direction][0], chain_ends[direction][1] + directions[direction][1])
-        try:
-          if self.state[next_point]["point"] == "hit":
-            chain_ends[direction] = next_point
-            chain_lengths[direction] += 1
-          elif self.state[next_point]["point"] == "miss":
-            chain_ends[direction] = None
-            end = True
-          else:
-            end = True
-        except:
-          end = True
-
-    if chain_lengths["N"] + chain_lengths["S"] == chain_lengths["W"] + chain_lengths["E"]:
-      chain_orientation = choice(("NS", "WE"))
-      chain_endpoints = { "N" : chain_ends["N"], "S" : chain_ends["S"] }# save NS chain as longest
-    if chain_ends["E"][0] - chain_ends["W"][0] > chain_ends["S"][0] - chain_ends["N"][0]:
-      chain_orientation = "WE",
-      chain_endpoints = { "W" : chain_ends["W"], "E" : chain_ends["E"] } # if WE is longer, replace it
-    print(chain_endpoints)
-    return chain_orientation, chain_endpoints
-
 boards = {
   "user" : Board(),
   "computer": Board(user=False)
@@ -320,7 +298,6 @@ def parse_input(input):
     raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
 
 def place_ships(user, test=False):
-  board = boards["user"] if user else boards["computer"]
   """
   When user is set to True, loops through the available ships and
   lets the user set them up on their board.
@@ -328,6 +305,8 @@ def place_ships(user, test=False):
   When user is set to False, automatically generates the board
   setup for the computer.
   """
+  board = boards["user"] if user else boards["computer"]
+
   if user and not test:
     input(
 """
@@ -369,7 +348,11 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 # game_loop and subfunctions
 def computer_choose_target():
-  # return (0,1)
+  """
+  Chooses a target for the computer using info on previous hits.
+
+  Identifies and corrects retargeting.
+  """
   board = boards["user"]
   random_choice = [randint(0,7), randint(0,7)]
 
@@ -388,54 +371,57 @@ def computer_choose_target():
   
   return ( target[0], target[1] )
 
-def game_loop():
-  def turn(user):
-    global prior_outcome
-    target_board = boards["computer"] if user else boards["user"]
-    got_input = False
-    while not got_input:
-      target_board.display_board()
-      target = input("""
+def turn(user):
+  """
+  Processes a turn.
+
+  If user is set to True, gets input from user and checks
+  whether the chosen target is hit.
+
+  If user is set to False, generates target for computer by
+  invoking computer_choose_target and checks whether the chosen
+  target is hit.
+  """
+  global prior_outcome
+  target_board = boards["computer"] if user else boards["user"]
+  got_input = False
+  while not got_input:
+    target_board.display_board()
+    target = input("""
 Enter a field you would like to target. ⇒
 """) if user else computer_choose_target()
-      try:
-        if user:
-          target = parse_input(target)
-        message = target_board.check_hit(target)
-        got_input = True
-      except Exception as e:
-        if user:
-          input(e)
-    target_board.display_board()
-  
-    input(message)
+    try:
+      if user:
+        target = parse_input(target)
+      message = target_board.check_hit(target)
+      got_input = True
+    except Exception as e:
+      if user:
+        input(e)
+  target_board.display_board()
+
+  input(message)
+
+def game_loop():
+  """
+  Runs the main game loop.
+
+  Alternates between user's and computer's turns until
+  one of the boards has no ships remaining.
+  """
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    # turn(user=True)
+    turn(user=True)
     turn(user=False)
 
 def main():
   """
   Runs all of the programme functionality.
   """
-  # display_rules()
-  # place_ships(user=True)
-  place_ships(user=True, test=True)
+  display_rules()
+  place_ships(user=True)
+  # place_ships(user=True, test=True)
   place_ships(user=False)
-  # print(boards["computer"].ship_count)
-  # boards['user'].update_point((0,0), "hit")
-  # boards['user'].update_point((0,1), "ship")
   game_loop()
-  # boards['user'].update_point((0,0), "hit")
-  # boards['user'].update_point((0,1), "hit")
-  # boards['user'].update_point((0,2), "hit")
-  # boards['user'].update_point((0,3), "hit")
-  # boards['user'].update_point((1,0), "hit")
-  # boards['user'].update_point((2,0), "hit")
-  # boards['user'].update_point((3,0), "hit")
-  # boards['user'].find_longest_chain_ends((0,0))
-  # print(boards['user'].state[(0,0)])
-  # print(boards['user'].state[(0,0)]["point"])
-
 
 main()
