@@ -169,17 +169,17 @@ class Board():
             this_point["is_in_chain"] = True
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
           
-          # opposite_point = (row, column)
-          # while True:
-          #   try:
-          #     opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
-          #     self.chain_ends.remove(opposite_chain_end)
-          #     opposite_chain_end["length"] = extendable_chain[0]["length"]
-          #     self.chain_ends.insert(-2, opposite_chain_end)
-          #     break
-          #   except:
-          #     new_coordinates = opposite_point + directions[direction]
-          #     opposite_point = (new_coordinates[0], new_coordinates[1])
+          opposite_point = (row + 1 * directions[direction][0], column + 1 * directions[direction][1])
+          while True:
+            try:
+              opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
+              self.chain_ends.remove(opposite_chain_end)
+              opposite_chain_end["length"] = extendable_chain[0]["length"]
+              self.chain_ends.insert(-2, opposite_chain_end)
+              break
+            except:
+              new_coordinates = opposite_point + directions[direction]
+              opposite_point = (new_coordinates[0], new_coordinates[1])
 
 
     if not this_point["is_in_chain"] and new_state == "hit":
@@ -411,16 +411,16 @@ def game_loop():
   """
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    turn(user=True)
+    # turn(user=True)
     turn(user=False)
 
 def main():
   """
   Runs all of the programme functionality.
   """
-  display_rules()
-  place_ships(user=True)
-  # place_ships(user=True, test=True)
+  # display_rules()
+  # place_ships(user=True)
+  place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
