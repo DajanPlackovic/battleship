@@ -373,22 +373,18 @@ def computer_choose_target():
   board = boards["user"]
   random_choice = [randint(0,7), randint(0,7)]
 
-  if len(board.chain_ends) == 0:
-    return random_choice
-  
+  last_target = None
   while True:
     try:
+      if len(board.chain_ends) == 0:
+        return random_choice
       target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
       print(target)
-      if board.state[(target[0], target[1])] == "hit" or board.state[(target[0], target[1])] == "miss":
+      if board.state[(target[0], target[1])]["point"] == "hit" or board.state[(target[0], target[1])]["point"] == "miss":
         raise ValueError("retry")
       break
     except:
-      if len(board.chain_ends):
-        board.chain_ends = board.chain_ends[:-1]
-      else:
-        target = random_choice
-        break
+      board.chain_ends = board.chain_ends[:-1]
   
   return ( target[0], target[1] )
 
@@ -415,20 +411,20 @@ Enter a field you would like to target. ⇒
     input(message)
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    turn(user=True)
+    # turn(user=True)
     turn(user=False)
 
 def main():
   """
   Runs all of the programme functionality.
   """
-  display_rules()
-  place_ships(user=True)
-  # place_ships(user=True, test=True)
+  # display_rules()
+  # place_ships(user=True)
+  place_ships(user=True, test=True)
   place_ships(user=False)
   # print(boards["computer"].ship_count)
-  boards['user'].update_point((0,0), "hit")
-  boards['user'].update_point((0,1), "ship")
+  # boards['user'].update_point((0,0), "hit")
+  # boards['user'].update_point((0,1), "ship")
   game_loop()
   # boards['user'].update_point((0,0), "hit")
   # boards['user'].update_point((0,1), "hit")
