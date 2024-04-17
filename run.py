@@ -347,7 +347,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
-def computer_choose_target(stutter):
+def computer_choose_target():
   """
   Chooses a target for the computer using info on previous hits.
 
@@ -387,10 +387,9 @@ def turn(user):
   got_input = False
   while not got_input:
     target_board.display_board()
-    stutter = False
     target = input("""
 Enter a field you would like to target. ⇒
-""") if user else computer_choose_target(stutter)
+""") if user else computer_choose_target()
     try:
       if user:
         target = parse_input(target)
