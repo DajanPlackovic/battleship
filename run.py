@@ -19,6 +19,13 @@ directions = {
   "E": [0, 1]
 }
 
+direction_complements = {
+  "N": "S",
+  "S": "N",
+  "W": "E",
+  "E": "W"
+}
+
 states = {
   "ship": "■",
   "orient": "□",
@@ -39,10 +46,9 @@ class Board():
     self.state = state if state else {}
     for i in range(8):
       for j in range(8):
-        self.state[(i, j)] = "unmarked"
-    
-    self.last_move = None
-    self.hit_chains = []
+        self.state[(i, j)] = { "point": "unmarked", "chains": [], "is_in_chain" : False}
+
+    self.chain_ends = []
     self.opponent = not user
     self.ship_count = sum(ships.values())
   
@@ -50,8 +56,11 @@ class Board():
     """
     Updates the state of a point and saves that state as the last move.
     """
-    self.state[coordinates] = new_state
-    self.last_move = (coordinates, new_state)
+    self.state[coordinates]["point"] = new_state
+    if new_state == "hit":
+      self.ship_count -= 1
+      if not self.opponent:
+        self.update_chains(coordinates)
 
   def display_board(self):
     """
@@ -60,10 +69,10 @@ class Board():
     board_display = [ list(['·'] * 8) for i in range(8) ]
     for point in self.state:
   
-      if self.opponent and self.state[point] == "ship":
+      if self.opponent and self.state[point]["point"] == "ship":
         continue
       row, column = point
-      board_display[row][column] = states[self.state[point]]
+      board_display[row][column] = states[self.state[point]["point"]]
 
     for idx in range(len(board_display)):
       print('  '.join([str(idx + 1), ' '.join(board_display[idx])]))
@@ -92,7 +101,7 @@ class Board():
         if not(0 <= new_col <= 7):
           continue
 
-        if self.state[(row, column)] != "unmarked":
+        if self.state[(row, column)]["point"] != "unmarked":
           continue
       
         counter += 1
@@ -112,11 +121,11 @@ class Board():
     """
     row, column = starting_square
 
-    self.state[(row, column)] = "ship"
+    self.state[(row, column)]["point"] = "ship"
 
     for direction in legitimate_directions:
       for idx in range(1, ships[ship]):
-        self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])] = "orient"
+        self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "orient"
 
     self.display_board()
 
@@ -133,7 +142,33 @@ class Board():
     self.state = { point: "unmarked" if state == "orient" else state for point, state in self.state.items() }
     
     for idx in range(ships[ship]):
-      self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])] = "ship"
+      self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
+
+  def update_chains(self, starting_point):
+    row, column = starting_point
+    this_point = self.state[(row, column)]
+    for direction in directions:
+      try:
+       next_point = self.state[(row + 1 * directions[direction][0], column + 1 * directions[direction][1])]
+      except:
+        continue
+      if next_point["is_in_chain"]:
+        extendable_chain = [ chain for chain in next_point["chains"] if direction in chain["orientation"]]
+        if len(extendable_chain):
+          extendable_chain[0]["length"] += 1
+          this_point["chains"].append(extendable_chain[0].copy())
+          extendable_chain["end"] = False
+    
+    if not this_point["is_in_chain"]:
+      this_point["chains"].append({ "orientation": "NS", "length": 1, "end": True })
+      this_point["chains"].append({ "orientation": "WE", "length": 1, "end":  True })
+      this_point["is_in_chain"] = True
+
+    chain_ends_elements = [ { "point": (row, column), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
+    self.chain_ends.extend(chain_ends_elements)
+
+    print("UPDATE_CHAINS")
+    print(self.chain_ends)
 
   def check_hit(self, target):
     """
@@ -145,7 +180,7 @@ class Board():
 
     retarget_error = ValueError("You already targeted that spot! Pick another one.\n\n⏎")
 
-    match self.state[(row, column)]:
+    match self.state[(row, column)]["point"]:
       case "hit":
         raise retarget_error
       case "miss":
@@ -154,7 +189,6 @@ class Board():
         if not self.opponent:
           input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
         self.update_point((row, column), "hit")
-        self.ship_count -= 1
 
         message = """
   Nice! You got one!
@@ -187,10 +221,10 @@ class Board():
       while not end:
         next_point = (chain_ends[direction][0] + directions[direction][0], chain_ends[direction][1] + directions[direction][1])
         try:
-          if self.state[next_point] == "hit":
+          if self.state[next_point]["point"] == "hit":
             chain_ends[direction] = next_point
             chain_lengths[direction] += 1
-          elif self.state[next_point] == "miss":
+          elif self.state[next_point]["point"] == "miss":
             chain_ends[direction] = None
             end = True
           else:
@@ -318,11 +352,13 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 # game_loop and subfunctions
 def computer_choose_target():
   board = boards["user"]
-  last_move = board.last_move
   random_choice = [randint(0,7), randint(0,7)]
 
-  hits = [ point for point in board.state if board.state[point] == "hit" ]
-  
+  return random_choice
+  if not board.longest_chain_end:
+    return random_choice
+
+  return random_choice
   if not last_move or len(hits) == 0: # if it's our first move or if we haven't hit anything yet, choose randomly
     return random_choice
   
@@ -368,7 +404,8 @@ def main():
   place_ships(user=True, test=True)
   place_ships(user=False)
   # print(boards["computer"].ship_count)
-  # game_loop()
+  boards['user'].update_point((0,1), "hit")
+  game_loop()
   # boards['user'].update_point((0,0), "hit")
   # boards['user'].update_point((0,1), "hit")
   # boards['user'].update_point((0,2), "hit")
@@ -377,6 +414,8 @@ def main():
   # boards['user'].update_point((2,0), "hit")
   # boards['user'].update_point((3,0), "hit")
   # boards['user'].find_longest_chain_ends((0,0))
+  # print(boards['user'].state[(0,0)])
+  # print(boards['user'].state[(0,0)]["point"])
 
 
 main()
