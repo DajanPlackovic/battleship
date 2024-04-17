@@ -140,7 +140,7 @@ class Board():
     
     row, column = starting_square
     
-    self.state = { point: "unmarked" if state == "orient" else state for point, state in self.state.items() }
+    self.state = { point : { "point" : "unmarked", "chains": [], "is_in_chain": False } if state["point"] == "orient" else state for point, state in self.state.items() }
     
     for idx in range(ships[ship]):
       self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
@@ -159,7 +159,21 @@ class Board():
           extendable_chain[0]["length"] += 1
           if new_state == "hit":
             this_point["chains"].append(extendable_chain[0].copy())
+            this_point["is_in_chain"] = True
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
+          
+          # opposite_point = (row, column)
+          # while True:
+          #   try:
+          #     opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
+          #     self.chain_ends.remove(opposite_chain_end)
+          #     opposite_chain_end["length"] = extendable_chain[0]["length"]
+          #     self.chain_ends.insert(-2, opposite_chain_end)
+          #     break
+          #   except:
+          #     new_coordinates = opposite_point + directions[direction]
+          #     opposite_point = (new_coordinates[0], new_coordinates[1])
+
 
     if not this_point["is_in_chain"] and new_state == "hit":
       this_point["chains"].append({ "orientation": "NS", "length": 1, "end": "N" })
@@ -172,7 +186,6 @@ class Board():
     chain_ends_elements = [ { "point": (row, column), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
     self.chain_ends.extend(chain_ends_elements)
 
-    print("UPDATE_CHAINS")
     print(self.chain_ends)
 
   def check_hit(self, target):
@@ -356,6 +369,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 # game_loop and subfunctions
 def computer_choose_target():
+  # return (0,1)
   board = boards["user"]
   random_choice = [randint(0,7), randint(0,7)]
 
@@ -366,7 +380,8 @@ def computer_choose_target():
     try:
       target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
       print(target)
-      board.state[(target[0], target[1])]
+      if board.state[(target[0], target[1])] == "hit" or board.state[(target[0], target[1])] == "miss":
+        raise ValueError("retry")
       break
     except:
       if len(board.chain_ends):
@@ -376,17 +391,6 @@ def computer_choose_target():
         break
   
   return ( target[0], target[1] )
-
-  if not last_move or len(hits) == 0: # if it's our first move or if we haven't hit anything yet, choose randomly
-    return random_choice
-  
-  if last_move[1] == "hit":
-    chain_orientation, chain_endpoints = board.find_longest_chain_ends(last_move[0])
-  else:
-    chain_orientation,chain_endpoints = board.find_longest_chain_ends(choice(hits))
-
-  direction = choice(chain_orientation)
-  return [chain_endpoints[direction][0] + directions[direction][0], chain_endpoints[direction][1] + directions[direction][1]]
 
 def game_loop():
   def turn(user):
@@ -411,18 +415,20 @@ Enter a field you would like to target. ⇒
     input(message)
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    # turn(user=True)
+    turn(user=True)
     turn(user=False)
 
 def main():
   """
   Runs all of the programme functionality.
   """
-  # display_rules()
-  place_ships(user=True, test=True)
+  display_rules()
+  place_ships(user=True)
+  # place_ships(user=True, test=True)
   place_ships(user=False)
   # print(boards["computer"].ship_count)
-  boards['user'].update_point((0,1), "hit")
+  boards['user'].update_point((0,0), "hit")
+  boards['user'].update_point((0,1), "ship")
   game_loop()
   # boards['user'].update_point((0,0), "hit")
   # boards['user'].update_point((0,1), "hit")
