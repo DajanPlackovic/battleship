@@ -2,7 +2,8 @@
 # You can delete these comments, but do not change the name of this file
 # Write your code to expect a terminal of 80 characters wide and 24 rows high
 from re import findall
-from random import randint, choice
+from random import randint, choice, shuffle
+import numpy as np
 
 ships = {
   "carrier" : 5,
@@ -13,10 +14,10 @@ ships = {
 }
 
 directions = {
-  "N": [-1, 0],
-  "S": [1, 0],
-  "W": [0, -1],
-  "E": [0, 1]
+  "N": np.array([-1, 0]),
+  "S": np.array([1, 0]),
+  "W": np.array([0, -1]),
+  "E": np.array([0, 1])
 }
 
 direction_complements = {
@@ -59,8 +60,8 @@ class Board():
     self.state[coordinates]["point"] = new_state
     if new_state == "hit":
       self.ship_count -= 1
-      if not self.opponent:
-        self.update_chains(coordinates)
+    if not self.opponent:
+      self.update_chains(coordinates, new_state)
 
   def display_board(self):
     """
@@ -144,7 +145,7 @@ class Board():
     for idx in range(ships[ship]):
       self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
 
-  def update_chains(self, starting_point):
+  def update_chains(self, starting_point, new_state):
     row, column = starting_point
     this_point = self.state[(row, column)]
     for direction in directions:
@@ -153,15 +154,19 @@ class Board():
       except:
         continue
       if next_point["is_in_chain"]:
-        extendable_chain = [ chain for chain in next_point["chains"] if direction in chain["orientation"]]
+        extendable_chain = [ chain for chain in next_point["chains"] if direction == direction_complements[chain["end"]]]
         if len(extendable_chain):
           extendable_chain[0]["length"] += 1
-          this_point["chains"].append(extendable_chain[0].copy())
-          extendable_chain["end"] = False
-    
-    if not this_point["is_in_chain"]:
-      this_point["chains"].append({ "orientation": "NS", "length": 1, "end": True })
-      this_point["chains"].append({ "orientation": "WE", "length": 1, "end":  True })
+          if new_state == "hit":
+            this_point["chains"].append(extendable_chain[0].copy())
+          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
+
+    if not this_point["is_in_chain"] and new_state == "hit":
+      this_point["chains"].append({ "orientation": "NS", "length": 1, "end": "N" })
+      this_point["chains"].append({ "orientation": "NS", "length": 1, "end": "S" })
+      this_point["chains"].append({ "orientation": "WE", "length": 1, "end": "W" })
+      this_point["chains"].append({ "orientation": "WE", "length": 1, "end": "E" })
+      shuffle(this_point["chains"])
       this_point["is_in_chain"] = True
 
     chain_ends_elements = [ { "point": (row, column), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
@@ -354,11 +359,24 @@ def computer_choose_target():
   board = boards["user"]
   random_choice = [randint(0,7), randint(0,7)]
 
-  return random_choice
-  if not board.longest_chain_end:
+  if len(board.chain_ends) == 0:
     return random_choice
+  
+  while True:
+    try:
+      target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
+      print(target)
+      board.state[(target[0], target[1])]
+      break
+    except:
+      if len(board.chain_ends):
+        board.chain_ends = board.chain_ends[:-1]
+      else:
+        target = random_choice
+        break
+  
+  return ( target[0], target[1] )
 
-  return random_choice
   if not last_move or len(hits) == 0: # if it's our first move or if we haven't hit anything yet, choose randomly
     return random_choice
   
