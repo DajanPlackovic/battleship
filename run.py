@@ -102,7 +102,7 @@ class Board():
         if not(0 <= new_col <= 7):
           continue
 
-        if self.state[(row, column)]["point"] != "unmarked":
+        if self.state[(new_row, new_col)]["point"] != "unmarked":
           continue
       
         counter += 1
@@ -347,7 +347,7 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 
 # game_loop and subfunctions
-def computer_choose_target():
+def computer_choose_target(stutter):
   """
   Chooses a target for the computer using info on previous hits.
 
@@ -387,9 +387,10 @@ def turn(user):
   got_input = False
   while not got_input:
     target_board.display_board()
+    stutter = False
     target = input("""
 Enter a field you would like to target. ⇒
-""") if user else computer_choose_target()
+""") if user else computer_choose_target(stutter)
     try:
       if user:
         target = parse_input(target)
@@ -398,6 +399,7 @@ Enter a field you would like to target. ⇒
     except Exception as e:
       if user:
         input(e)
+      stutter = True
   target_board.display_board()
 
   input(message)
@@ -419,8 +421,8 @@ def main():
   Runs all of the programme functionality.
   """
   # display_rules()
-  # place_ships(user=True)
-  place_ships(user=True, test=True)
+  place_ships(user=True)
+  # place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
