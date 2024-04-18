@@ -208,28 +208,16 @@ class Board():
         raise retarget_error
     elif self.state[(row, column)]["point"] == "ship":
         if not self.opponent:
-          input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
+          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.", input_required=False)
         self.update_point((row, column), "hit")
 
-        message = """
-  Nice! You got one!
-  ⏎
-  """ if self.opponent else """
-  Nice! I got you!
-  ⏎
-  """
+        message = "Nice! You got one!" if self.opponent else "Nice! I got you!"
     elif self.state[(row, column)]["point"] == "unmarked":
         if not self.opponent:
-          input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
+          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.", input_required=False)
         self.update_point((row, column), "miss")
 
-        message = """
-    Yikes! Better luck next time...
-    ⏎
-    """ if self.opponent else """
-    Damn! I'm sure I was close.
-    ⏎
-    """
+        message = "Yikes! Better luck next time..." if self.opponent else "Damn! I'm sure I was close."
 
     return message
   
@@ -281,7 +269,7 @@ def display_screen(message, input_required=False, comp_board=True):
   else:
     input(f"\n{message}\n\n⏎\n")
 
-  os.system("cls" if os.name == "nt" else "clear")
+  os.system("clear")
   return input_value  
 
 
