@@ -277,7 +277,7 @@ press enter to continue.""", input_required=False, comp_board=False)
 Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
   
   while len(input_test) == 0:
-    input_test = display_screen("See, that's the one thing that won't work. When you see the ⇒ arrow,\nyou gotta type something.\nTry again", input_required=True, comp_board=False)
+    input_test = display_screen("See, that's the one thing that won't work. When you see the ⇒ arrow,\nyou gotta type something.\n\nTry again.", input_required=True, comp_board=False)
   
 
 # place_ships and its subfunctions
@@ -332,7 +332,7 @@ place it.""", input_required=False, comp_board=False)
     while not(got_input):
       if user and not test:
         board.display_board()
-      starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}", input_required=True, comp_board=False) if user and not test else [ randint(0, 7), randint(0, 7) ]
+      starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}\n\nYou can do so by entering a column (A-H) and\na row (1-8) in any order.", input_required=True, comp_board=False) if user and not test else [ randint(0, 7), randint(0, 7) ]
       try:
         if user and not test:
           starting_square = parse_input(starting_square)
