@@ -4,6 +4,7 @@
 from re import findall
 from random import randint, choice, shuffle
 import numpy as np
+import os
 
 ships = {
   "carrier" : 5,
@@ -75,9 +76,7 @@ class Board():
       row, column = point
       board_display[row][column] = states[self.state[point]["point"]]
 
-    for idx in range(len(board_display)):
-      print('  '.join([str(idx + 1), ' '.join(board_display[idx])]))
-    print('   ' + ' '.join([ str(letter) for letter in columns ]))
+    return board_display
   
   def find_legitimate_directions(self, starting_square, ship):
     """
@@ -128,20 +127,25 @@ class Board():
       for idx in range(1, ships[ship]):
         self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "orient"
 
-    self.display_board()
-
   def implement_direction(self, starting_square, direction, legitimate_directions, ship):
     """
     Accept direction input if legitimate, throw error if not legitimate.
+
+    Returns True if the choice of starting coordinates should be reset, otherwise None.
     """
     direction = direction.upper()
-    if not(direction in legitimate_directions):
+
+    if not(direction in legitimate_directions or direction == "R"):
       raise ValueError(f"{direction} is not one of the possible directions.")
     
     row, column = starting_square
     
     self.state = { point : { "point" : "unmarked", "chains": [], "is_in_chain": False } if state["point"] == "orient" else state for point, state in self.state.items() }
     
+    if direction == "R":
+      self.state[(row, column)]["point"] = "unmarked"
+      return True
+
     for idx in range(ships[ship]):
       self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
 
@@ -237,31 +241,68 @@ boards = {
 columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 rows = [str(num) for num in range(1,9)]
 
+def display_screen(message, input_required=False, comp_board=True):
+  """
+  Displays the message instructing the user on the next step,
+  an input sign if input is expected and an enter sign in case
+  none is and either the user's board or both the computer's and
+  the user's board.
+  """ 
+  print("""
+ ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
+/\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
+\ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/ 
+ \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
+  \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
+""") # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
+  
+  print("\n" + "=" * 80 + "\n")
+
+  user_display = boards['user'].display_board()
+  if comp_board:
+    comp_display = boards['computer'].display_board()
+
+  for idx in range(8):
+    output = '  '.join([str(idx + 1), ' '.join(user_display[idx])])
+    if comp_board:
+      output += " " * 4 + " | " + " " * 4 + '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
+    else:
+      output = " " * 20 + output
+    print(" " * 10 + output)
+  if comp_board:
+    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+  
+  print("\n" + "=" * 80 + "\n")
+  
+  input_value = None
+
+  if input_required:
+    input_value = input(f"\n{message}\n\n⇒\n")
+  else:
+    input(f"\n{message}\n\n⏎\n")
+
+  os.system("cls" if os.name == "nt" else "clear")
+  return input_value  
+
+
+
 def display_rules():
   """
   Show all the rules at the beginning of the game.
   """
-  input("""
-Welcome to BATTLESHIP!
+  display_screen("""Welcome to BATTLESHIP!
         
 Whenever you see the symbol at the bottom of this message,
-press enter to continue.
-        
-⏎
-""")
+press enter to continue.""", input_required=False, comp_board=False)
   
-  input_test = input("""
-Whenever you instead see the symbol below, you will be asked to input something.
+  input_test = display_screen("""Whenever you instead see the symbol below, you will be asked to input something.
         
-Type anything in and press Enter. Just don't leave it blank. ⇒
-""")
+Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
   
   while len(input_test) == 0:
-    input_test = input("""
-See, that's the one thing that won't work. When you see the ⇒ arrow, you gotta type something.
+    input_test = display_screen("""See, that's the one thing that won't work. When you see the ⇒ arrow, you gotta type something.
                        
-Try again ⇒
-""")
+Try again""", input_required=True, comp_board=False)
   
 
 # place_ships and its subfunctions
@@ -301,34 +342,26 @@ def place_ships(user, test=False):
   board = boards["user"] if user else boards["computer"]
 
   if user and not test:
-    input(
-"""
-Start by placing your ships. You can do so by first entering a point
-on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
-
-⏎
-""")
+    display_screen(
+"""Start by placing your ships. You can do so by first entering a point
+on the board (e.g. A2) and then choosing an orientation (N, E, S, W).""", input_required=False, comp_board=False)
   if not user and not test:
-    input(
-"""
-OK. Just give me a moment to place my ships as well...
-
-⏎
-""")
+    display_screen(
+"""OK. Just give me a moment to place my ships as well...""", input_required=False, comp_board=True)
 
   for ship in ships:
     got_input = False
     while not(got_input):
       if user and not test:
         board.display_board()
-      starting_square = input(f"Place the {ship.capitalize()}: Length {ships[ship]} ⇒\n") if user and not test else [ randint(0, 7), randint(0, 7) ]
+      starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}", input_required=True, comp_board=False) if user and not test else [ randint(0, 7), randint(0, 7) ]
       try:
         if user and not test:
           starting_square = parse_input(starting_square)
         legitimate_directions = board.find_legitimate_directions(starting_square, ship)
       except Exception as e:
         if user and not test:
-          input(e)
+          display_screen(e, input_required=False, comp_board=False)
         continue
 
       got_orientation = False
@@ -336,25 +369,20 @@ OK. Just give me a moment to place my ships as well...
         try:
           if user and not test:
             board.show_directions(starting_square, legitimate_directions, ship)
-          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user and not test else choice(legitimate_directions)
-          if chosen_direction.upper() == "R":
+          chosen_direction = display_screen(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}", input_required=True, comp_board=False) if user and not test else choice(legitimate_directions)
+          reset = board.implement_direction(starting_square, chosen_direction, legitimate_directions, ship)
+          if reset:
             break
-          board.implement_direction(starting_square, chosen_direction, legitimate_directions, ship)
           got_orientation = True
         except Exception as e:
           if user and not test:
-            print(e)
+            display_screen(e, input_required=False, comp_board=False)
           continue
 
       if got_orientation:
         got_input = True 
   if user and not test:
-    board.display_board()
-    input("""
-So this is your final board setup.
-
-⏎
-""")
+    display_screen("So this is your final board setup.", input_required=False, comp_board=False)
 
 
 # game_loop and subfunctions
@@ -396,10 +424,7 @@ def turn(user):
 
   got_input = False
   while not got_input:
-    target_board.display_board()
-    target = input("""
-Enter a field you would like to target. ⇒
-""") if user else computer_choose_target()
+    target = display_screen("Enter a field you would like to target.", input_required=True) if user else computer_choose_target()
     try:
       if user:
         target = parse_input(target)
@@ -407,10 +432,9 @@ Enter a field you would like to target. ⇒
       got_input = True
     except Exception as e:
       if user:
-        input(e)
-  target_board.display_board()
+        display_screen(e, input_required=False)
 
-  input(message)
+  display_screen(message, input_required=False)
 
 def game_loop():
   """
@@ -420,16 +444,12 @@ def game_loop():
   one of the boards has no ships remaining.
   """
 
-  input("""
-Let's play!
+  display_screen("""Let's play!
         
 You can start by entering a coordinate, same as you did in the first step
 when placing your ships, to target one of mine.
         
-I'll let you know whether you hit or missed and then take my turn.
-        
-⏎
-""")
+I'll let you know whether you hit or missed and then take my turn.""", input_required=False)
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
     turn(user=True)
@@ -439,9 +459,9 @@ def main():
   """
   Runs all of the programme functionality.
   """
-  # display_rules()
+  display_rules()
   place_ships(user=True)
-  place_ships(user=True, test=True)
+  # place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
