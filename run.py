@@ -163,11 +163,12 @@ class Board():
       if next_point["is_in_chain"]:
         extendable_chain = [ chain for chain in next_point["chains"] if direction == direction_complements[chain["end"]]]
         if len(extendable_chain):
-          extendable_chain[0]["length"] += 1
-          if new_state == "hit":
-            this_point["chains"].append(extendable_chain[0].copy())
-            this_point["is_in_chain"] = True
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
+          if new_state == "miss":
+            continue
+          extendable_chain[0]["length"] += 1
+          this_point["chains"].append(extendable_chain[0].copy())
+          this_point["is_in_chain"] = True
 
           opposite_point = (row + 1 * directions[direction][0], column + 1 * directions[direction][1])
 
@@ -366,8 +367,8 @@ def computer_choose_target():
   while True:
     try:
       if len(board.chain_ends) == 0:
-        # return random_choice
-        return ( 3, 3 )
+        return random_choice
+        # return ( 3, 3 )
       target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
       print(target)
       if board.state[(target[0], target[1])]["point"] == "hit" or board.state[(target[0], target[1])]["point"] == "miss":
@@ -427,8 +428,8 @@ def main():
   Runs all of the programme functionality.
   """
   # display_rules()
-  place_ships(user=True)
-  # place_ships(user=True, test=True)
+  # place_ships(user=True)
+  place_ships(user=True, test=True)
   # place_ships(user=False)
   game_loop()
 
