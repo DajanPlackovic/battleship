@@ -253,9 +253,9 @@ def display_screen(message, input_required=False, comp_board=True):
       output = " " * 20 + output
     print_with_lead(" " * 10 + output)
   if comp_board:
-    print_with_lead(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   else:
-    print_with_lead(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    print(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   
   print_with_lead("\n" + "=" * 80 + "\n")
   
