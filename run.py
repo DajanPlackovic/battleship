@@ -166,11 +166,11 @@ class Board():
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
           if new_state == "miss":
             continue
+          opposite_point = (row + extendable_chain[0]["length"] * directions[direction][0], column + extendable_chain[0]["length"] * directions[direction][1])
+          
           extendable_chain[0]["length"] += 1
           this_point["chains"].append(extendable_chain[0].copy())
           this_point["is_in_chain"] = True
-
-          opposite_point = (row + next_point["length"] * directions[direction][0], column + next_point["length"] * directions[direction][1])
 
           perpendicular_directions = [ dir for dir in directions.keys() if dir != direction and dir != direction_complements[direction]]
 
@@ -244,7 +244,8 @@ def display_rules():
   input("""
 Welcome to BATTLESHIP!
         
-Whenever you see the symbol at the bottom of this message, press enter to continue.
+Whenever you see the symbol at the bottom of this message,
+press enter to continue.
         
 ⏎
 """)
@@ -388,8 +389,8 @@ def turn(user):
   invoking computer_choose_target and checks whether the chosen
   target is hit.
   """
-  global prior_outcome
   target_board = boards["computer"] if user else boards["user"]
+
   got_input = False
   while not got_input:
     target_board.display_board()
@@ -404,7 +405,6 @@ Enter a field you would like to target. ⇒
     except Exception as e:
       if user:
         input(e)
-      stutter = True
   target_board.display_board()
 
   input(message)
@@ -436,9 +436,9 @@ def main():
   """
   Runs all of the programme functionality.
   """
-  display_rules()
-  place_ships(user=True)
-  # place_ships(user=True, test=True)
+  # display_rules()
+  # place_ships(user=True)
+  place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
