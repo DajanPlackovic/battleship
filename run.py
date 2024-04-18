@@ -428,10 +428,10 @@ You can start by entering a coordinate, same as you did in the first step
 when placing your ships, to target one of mine.
         
 I'll let you know whether you hit or missed and then take my turn.""", input_required=False)
-  
+  user = True
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    turn(user=True)
-    turn(user=False)
+    turn(user)
+    user = not user
 
 def main():
   """
