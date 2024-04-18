@@ -236,13 +236,6 @@ def display_screen(message, input_required=False, comp_board=True):
   none is and either the user's board or both the computer's and
   the user's board.
   """ 
-#   print("""
-#  ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
-# /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
-# \ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/ 
-#  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
-#   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
-# """) # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
   
   print("\n" + "=" * 80 + "\n")
 
@@ -447,6 +440,15 @@ def main():
   """
   Runs all of the programme functionality.
   """
+  print("""
+ ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
+/\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
+\ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/ 
+ \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
+  \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
+""") # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
+  input("PRESS ENTER TO BEGIN")
+  os.system("clear")
   display_rules()
   place_ships(user=True)
   # place_ships(user=True, test=True)
