@@ -281,9 +281,7 @@ press enter to continue.""", input_required=False, comp_board=False)
 Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
   
   while len(input_test) == 0:
-    input_test = display_screen("""See, that's the one thing that won't work. When you see the ⇒ arrow, you gotta type something.
-                       
-Try again""", input_required=True, comp_board=False)
+    input_test = display_screen("See, that's the one thing that won't work. When you see the ⇒ arrow,\nyou gotta type something.\nTry again", input_required=True, comp_board=False)
   
 
 # place_ships and its subfunctions
@@ -325,7 +323,10 @@ def place_ships(user, test=False):
   if user and not test:
     display_screen(
 """Start by placing your ships. You can do so by first entering a point
-on the board (e.g. A2) and then choosing an orientation (N, E, S, W).""", input_required=False, comp_board=False)
+on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
+
+The ship name and length will be shown before you are asked to
+place it.""", input_required=False, comp_board=False)
   if not user and not test:
     display_screen(
 """OK. Just give me a moment to place my ships as well...""", input_required=False, comp_board=True)
