@@ -323,6 +323,14 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 The ship name and length will be shown before you are asked to
 place it.""", input_required=False, comp_board=False)
+    display_screen("""You will be asked to place the following five ships:
+- Carrier : 5 Spaces Long
+- Battleship : 4 Spaces Long
+- Cruiser : 3 Spaces Long
+- Submarine : 3 Spaces Long
+- Destroyer : 2 Spaces Long
+
+The ship may not overlap, nor may they be placed\npartially outside the board.""")
   if not user and not test:
     display_screen(
 """OK. Just give me a moment to place my ships as well...""", input_required=False, comp_board=True)
