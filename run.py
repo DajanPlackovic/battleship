@@ -36,6 +36,9 @@ states = {
   "unmarked": "·"
 }
 
+columns = [ chr(code) for code in range(65, 73) ]
+rows = [ str(num) for num in range (1, 9) ]
+
 class Board():
   """
   Initalizes a board:
@@ -84,24 +87,17 @@ class Board():
     out of bounds or intersect an already placed ship.
     """
     legitimate_directions = []
-    row, column = starting_square
+    starting_square = np.array(starting_square)
 
     for direction in directions:
-      row_mod = directions[direction][0]
-      col_mod = directions[direction][1]
-
       counter = 0
 
       for idx in range(ships[ship]):
-        new_row = row + idx * row_mod
-        if not(0 <= new_row <= 7):
+        move_square = starting_square + idx * directions[direction]
+        if not all(0 <= move_square) or not all(move_square  <= 7):
           continue
 
-        new_col = column + idx * col_mod
-        if not(0 <= new_col <= 7):
-          continue
-
-        if self.state[(new_row, new_col)]["point"] != "unmarked":
+        if self.state[tuple(move_square)]["point"] != "unmarked":
           continue
       
         counter += 1
@@ -247,7 +243,6 @@ def display_screen(message, input_required=False, comp_board=True):
       output = " " * 20 + output
     print(" " * 10 + output)
   
-  columns = [ chr(code) for code in range(65, 73) ]
   if comp_board:
     print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   else:
