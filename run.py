@@ -223,14 +223,18 @@ boards = {
   "computer": Board(user=False)
 }
 
-def display_screen(message, input_required=False, comp_board=True):
+def display_screen(message, input_required=False, comp_board=True, ship_list=None):
   """
   Displays the message instructing the user on the next step,
   an input sign if input is expected and an enter sign in case
   none is and either the user's board or both the computer's and
   the user's board.
   """ 
-  print("\n" + "=" * 80 + "\n")
+  v_separator = "\n" + "=" * 80 + "\n"
+  h_separator = " " * 4 + " | " + " " * 4
+  ship_names = [ name for name in ships.keys() ]
+
+  print(v_separator)
 
   user_display = boards['user'].display_board()
   if comp_board:
@@ -239,17 +243,23 @@ def display_screen(message, input_required=False, comp_board=True):
   for idx in range(8):
     output = '  '.join([str(idx + 1), ' '.join(user_display[idx])])
     if comp_board:
-      output += " " * 4 + " | " + " " * 4 + '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
+      output += h_separator + '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
+    elif ship_list:
+      output += h_separator
+      if idx in range(2,7):
+        output += f'  { states["ship"] if ship_list in ship_names and ship_names.index(ship_list) < idx - 2 else states["orient"]} {ship_names[idx - 2].capitalize()}' + " " * (10 - len(ship_names[idx-2])) + f': Length {ships[ship_names[idx - 2]]}'
     else:
       output = " " * 20 + output
     print(" " * 10 + output)
   
   if comp_board:
-    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + h_separator + '   ' + ' '.join([ str(letter) for letter in columns ]))
+  elif ship_list:
+    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + h_separator)
   else:
     print(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   
-  print("\n" + "=" * 80 + "\n")
+  print(v_separator)
   
   input_value = None
 
@@ -323,13 +333,8 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 The ship name and length will be shown before you are asked to
 place it.""", comp_board=False)
-    display_screen("""You will be asked to place the following five ships on your board>
-- Carrier    : 5 Spaces Long
-- Battleship : 4 Spaces Long
-- Cruiser    : 3 Spaces Long
-- Submarine  : 3 Spaces Long
-- Destroyer  : 2 Spaces Long""", comp_board=False)
-    display_screen("The ships may not overlap, nor may they be placed\npartially outside the board.", comp_board=False)
+    display_screen("You will be asked to place the five ships you see above on your board.", comp_board=False, ship_list=True)
+    display_screen("The ships may not overlap, nor may they be placed\npartially outside the board.", comp_board=False, ship_list=True)
   if not user and not test:
     display_screen(
 """OK. Just give me a moment to place my ships as well...""", input_required=False, comp_board=True)
@@ -339,14 +344,14 @@ place it.""", comp_board=False)
     while not(got_input):
       if user and not test:
         board.display_board()
-      starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}\n\nYou can do so by entering a column (A-H) and\na row (1-8) in any order.", input_required=True, comp_board=False) if user and not test else [ randint(0, 7), randint(0, 7) ]
+      starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}\n\nYou can do so by entering a column (A-H) and\na row (1-8) in any order.", input_required=True, comp_board=False, ship_list=ship) if user and not test else [ randint(0, 7), randint(0, 7) ]
       try:
         if user and not test:
           starting_square = parse_input(starting_square)
         legitimate_directions = board.find_legitimate_directions(starting_square, ship)
       except Exception as e:
         if user and not test:
-          display_screen(e, input_required=False, comp_board=False)
+          display_screen(e, input_required=False, comp_board=False, ship_list=ship)
         continue
 
       got_orientation = False
@@ -354,14 +359,14 @@ place it.""", comp_board=False)
         try:
           if user and not test:
             board.show_directions(starting_square, legitimate_directions, ship)
-          chosen_direction = display_screen(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}", input_required=True, comp_board=False) if user and not test else choice(legitimate_directions)
+          chosen_direction = display_screen(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
           reset = board.implement_direction(starting_square, chosen_direction, legitimate_directions, ship)
           if reset:
             break
           got_orientation = True
         except Exception as e:
           if user and not test:
-            display_screen(e, input_required=False, comp_board=False)
+            display_screen(e, input_required=False, comp_board=False, ship_list=ship)
           continue
 
       if got_orientation:
@@ -453,7 +458,7 @@ def main():
 """) # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
   input(" " * 26 + "PRESS ENTER TO BEGIN\n")
   os.system("clear")
-  display_rules()
+  # display_rules()
   place_ships(user=True)
   # place_ships(user=True, test=True)
   place_ships(user=False)
