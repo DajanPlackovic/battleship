@@ -226,9 +226,6 @@ boards = {
   "computer": Board(user=False)
 }
 
-columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-rows = [str(num) for num in range(1,9)]
-
 def display_screen(message, input_required=False, comp_board=True):
   """
   Displays the message instructing the user on the next step,
@@ -249,6 +246,8 @@ def display_screen(message, input_required=False, comp_board=True):
     else:
       output = " " * 20 + output
     print(" " * 10 + output)
+  
+  columns = [ chr(code) for code in range(65, 73) ]
   if comp_board:
     print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   else:
