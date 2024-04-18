@@ -198,12 +198,11 @@ class Board():
 
     retarget_error = ValueError("You already targeted that spot! Pick another one.\n\n⏎")
 
-    match self.state[(row, column)]["point"]:
-      case "hit":
+    if self.state[(row, column)]["point"] == "hit":
         raise retarget_error
-      case "miss":
+    elif self.state[(row, column)]["point"] == "miss":
         raise retarget_error
-      case "ship":
+    elif self.state[(row, column)]["point"] == "ship":
         if not self.opponent:
           input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
         self.update_point((row, column), "hit")
@@ -215,7 +214,7 @@ class Board():
   Nice! I got you!
   ⏎
   """
-      case "unmarked":
+    elif self.state[(row, column)]["point"] == "unmarked":
         if not self.opponent:
           input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
         self.update_point((row, column), "miss")
