@@ -252,6 +252,8 @@ def display_screen(message, input_required=False, comp_board=True):
     print(" " * 10 + output)
   if comp_board:
     print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+  else:
+    print(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   
   print("\n" + "=" * 80 + "\n")
   
