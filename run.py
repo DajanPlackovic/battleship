@@ -236,8 +236,10 @@ def display_screen(message, input_required=False, comp_board=True):
   none is and either the user's board or both the computer's and
   the user's board.
   """ 
+  def print_with_lead(line):
+    print(" " * 2 + line)
   
-  print("\n" + "=" * 80 + "\n")
+  print_with_lead("\n" + "=" * 80 + "\n")
 
   user_display = boards['user'].display_board()
   if comp_board:
@@ -249,13 +251,13 @@ def display_screen(message, input_required=False, comp_board=True):
       output += " " * 4 + " | " + " " * 4 + '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
     else:
       output = " " * 20 + output
-    print(" " * 10 + output)
+    print_with_lead(" " * 10 + output)
   if comp_board:
-    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    print_with_lead(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + " " * 4 + " | " + " " * 4 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   else:
-    print(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    print_with_lead(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
   
-  print("\n" + "=" * 80 + "\n")
+  print_with_lead("\n" + "=" * 80 + "\n")
   
   input_value = None
 
