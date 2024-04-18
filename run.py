@@ -134,16 +134,16 @@ class Board():
     if not(direction in legitimate_directions or direction == "R"):
       raise ValueError(f"{direction} is not one of the possible directions.")
     
-    row, column = starting_square
+    starting_square = np.array(starting_square)
     
     self.state = { point : { "point" : "unmarked", "chains": [], "is_in_chain": False } if state["point"] == "orient" else state for point, state in self.state.items() }
     
     if direction == "R":
-      self.state[(row, column)]["point"] = "unmarked"
+      self.state[tuple(starting_square)]["point"] = "unmarked"
       return True
 
     for idx in range(ships[ship]):
-      self.state[(row + idx * directions[direction][0], column + idx * directions[direction][1])]["point"] = "ship"
+      self.state[tuple(starting_square + idx * directions[direction])]["point"] = "ship"
 
   def update_chains(self, starting_point, new_state):
     """
