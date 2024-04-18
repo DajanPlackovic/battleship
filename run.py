@@ -264,7 +264,7 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
   input_value = None
 
   if input_required:
-    input_value = input(f"\n{message}\n\n⇒\n")
+    input_value = input(f"\n{message}\n\n====>\n")
   else:
     input(f"\n{message}\n\n⏎\n")
 
@@ -282,12 +282,12 @@ def display_rules():
 Whenever you see the symbol at the bottom of this message,
 press enter to continue.""", input_required=False, comp_board=False)
   
-  input_test = display_screen("""Whenever you instead see the symbol below, you will be asked to input something.
+  input_test = display_screen("""Whenever you instead see the arrow below, you will be asked to input something.
         
 Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
   
   while len(input_test) == 0:
-    input_test = display_screen("See, that's the one thing that won't work. When you see the ⇒ arrow,\nyou gotta type something.\n\nTry again.", input_required=True, comp_board=False)
+    input_test = display_screen("See, that's the one thing that won't work. When you see the arrow,\nyou gotta type something.\n\nTry again.", input_required=True, comp_board=False)
   
 
 # place_ships and its subfunctions
