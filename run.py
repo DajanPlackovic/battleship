@@ -205,13 +205,13 @@ class Board():
         raise retarget_error
     elif self.state[(row, column)]["point"] == "ship":
         if not self.opponent:
-          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.", input_required=False)
+          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
         self.update_point((row, column), "hit")
 
         message = "Nice! You got one!" if self.opponent else "Nice! I got you!"
     elif self.state[(row, column)]["point"] == "unmarked":
         if not self.opponent:
-          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.", input_required=False)
+          display_screen(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
         self.update_point((row, column), "miss")
 
         message = "Yikes! Better luck next time..." if self.opponent else "Damn! I'm sure I was close."
