@@ -446,9 +446,9 @@ def main():
 """) # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
   input(" " * 26 + "PRESS ENTER TO BEGIN\n")
   os.system("clear")
-  # display_rules()
-  # place_ships(user=True)
-  place_ships(user=True, test=True)
+  display_rules()
+  place_ships(user=True)
+  # place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
