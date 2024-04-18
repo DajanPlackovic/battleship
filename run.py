@@ -176,19 +176,6 @@ class Board():
 
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] == opposite_point and not (chain_end["end"] in perpendicular_directions and chain_end["length"] == 1)]
           
-          # while True:
-          #   try:
-          #     if not 0 <= opposite_point[0] <= 7 or not 0 <= opposite_point[1] <= 7:
-          #       break
-          #     opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
-          #     self.chain_ends.remove(opposite_chain_end)
-          #     opposite_chain_end["length"] = extendable_chain[0]["length"]
-          #     self.chain_ends.insert(-2, opposite_chain_end)
-          #     break
-          #   except:
-          #     new_coordinates = opposite_point + directions[direction]
-          #     opposite_point = (new_coordinates[0], new_coordinates[1])
-
 
     if not this_point["is_in_chain"] and new_state == "hit":
       this_point["chains"].append({ "orientation": "NS", "length": 1, "end": "N" })
@@ -200,8 +187,6 @@ class Board():
 
     chain_ends_elements = [ { "point": (row, column), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
     self.chain_ends.extend(chain_ends_elements)
-
-    print(self.chain_ends)
 
   def check_hit(self, target):
     """
@@ -220,7 +205,7 @@ class Board():
         raise retarget_error
       case "ship":
         if not self.opponent:
-          input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
+          input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
         self.update_point((row, column), "hit")
 
         message = """
@@ -232,7 +217,7 @@ class Board():
   """
       case "unmarked":
         if not self.opponent:
-          input(f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
+          input(f"\nLet's see... I think I'll go for {columns[column] + rows[row]}.\n\n⏎")
         self.update_point((row, column), "miss")
 
         message = """
@@ -260,7 +245,7 @@ def display_rules():
   input("""
 Welcome to BATTLESHIP!
         
-Whenever you see the symbol at the bottom of this message, press any key to continue.
+Whenever you see the symbol at the bottom of this message, press enter to continue.
         
 ⏎
 """)
@@ -323,6 +308,14 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
 
 ⏎
 """)
+  if not user and not test:
+    input(
+"""
+OK. Just give me a moment to place my ships as well...
+
+⏎
+""")
+
   for ship in ships:
     got_input = False
     while not(got_input):
@@ -352,6 +345,13 @@ on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
           continue
 
       got_input = True 
+  if user and not test:
+    board.display_board()
+    input("""
+So this is your final board setup.
+
+⏎
+""")
 
 
 # game_loop and subfunctions
@@ -370,7 +370,6 @@ def computer_choose_target():
         return random_choice
         # return ( 3, 3 )
       target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
-      print(target)
       if board.state[(target[0], target[1])]["point"] == "hit" or board.state[(target[0], target[1])]["point"] == "miss":
         raise ValueError("retry")
       break
@@ -418,19 +417,30 @@ def game_loop():
   Alternates between user's and computer's turns until
   one of the boards has no ships remaining.
   """
+
+  input("""
+Let's play!
+        
+You can start by entering a coordinate, same as you did in the first step
+when placing your ships, to target one of mine.
+        
+I'll let you know whether you hit or missed and then take my turn.
+        
+⏎
+""")
   
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
-    # turn(user=True)
+    turn(user=True)
     turn(user=False)
 
 def main():
   """
   Runs all of the programme functionality.
   """
-  # display_rules()
-  # place_ships(user=True)
-  place_ships(user=True, test=True)
-  # place_ships(user=False)
+  display_rules()
+  place_ships(user=True)
+  # place_ships(user=True, test=True)
+  place_ships(user=False)
   game_loop()
 
 main()
