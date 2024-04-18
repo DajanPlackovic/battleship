@@ -232,6 +232,8 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
   """ 
   v_separator = "\n" + "=" * 80 + "\n"
   h_separator = " " * 4 + " | " + " " * 4
+  padding = 0
+
   ship_names = [ name for name in ships.keys() ]
 
   print(v_separator)
@@ -242,22 +244,24 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
 
   for idx in range(8):
     output = '  '.join([str(idx + 1), ' '.join(user_display[idx])])
-    if comp_board:
-      output += h_separator + '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
-    elif ship_list:
+    if comp_board or ship_list:
       output += h_separator
+    padding = 40 - len(output)
+    if comp_board:
+      output += '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
+    elif ship_list:
       if idx in range(2,7):
         output += f'  { states["ship"] if ship_list in ship_names and ship_names.index(ship_list) < idx - 2 else states["orient"]} {ship_names[idx - 2].capitalize()}' + " " * (10 - len(ship_names[idx-2])) + f': Length {ships[ship_names[idx - 2]]}'
-    else:
-      output = " " * 20 + output
-    print(" " * 10 + output)
-  
+    print(" " * padding + output) 
+
+  output = '   ' + ' '.join([ str(letter) for letter in columns ])
+  if comp_board or ship_list:
+    output += h_separator
+  padding = 40 - len(output)
   if comp_board:
-    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + h_separator + '   ' + ' '.join([ str(letter) for letter in columns ]))
-  elif ship_list:
-    print(" " * 10 + '   ' + ' '.join([ str(letter) for letter in columns ]) + h_separator)
-  else:
-    print(" " * 30 + '   ' + ' '.join([ str(letter) for letter in columns ]))
+    output += '   ' + ' '.join([ str(letter) for letter in columns ])
+
+  print(" " * padding + output)
   
   print(v_separator)
   
@@ -280,7 +284,7 @@ def display_rules():
   display_screen("""Welcome to BATTLESHIP!
         
 Whenever you see the symbol at the bottom of this message,
-press enter to continue.""", input_required=False, comp_board=False)
+press enter to continue.""", comp_board=False)
   
   input_test = display_screen("""Whenever you instead see the arrow below, you will be asked to input something.
         
@@ -337,7 +341,7 @@ place it.""", comp_board=False)
     display_screen("The ships may not overlap, nor may they be placed\npartially outside the board.", comp_board=False, ship_list=True)
   if not user and not test:
     display_screen(
-"""OK. Just give me a moment to place my ships as well...""", input_required=False, comp_board=True)
+"""OK. Just give me a moment to place my ships as well...""", comp_board=True)
 
   for ship in ships:
     got_input = False
@@ -351,7 +355,7 @@ place it.""", comp_board=False)
         legitimate_directions = board.find_legitimate_directions(starting_square, ship)
       except Exception as e:
         if user and not test:
-          display_screen(e, input_required=False, comp_board=False, ship_list=ship)
+          display_screen(e, comp_board=False, ship_list=ship)
         continue
 
       got_orientation = False
@@ -366,13 +370,13 @@ place it.""", comp_board=False)
           got_orientation = True
         except Exception as e:
           if user and not test:
-            display_screen(e, input_required=False, comp_board=False, ship_list=ship)
+            display_screen(e, comp_board=False, ship_list=ship)
           continue
 
       if got_orientation:
         got_input = True 
   if user and not test:
-    display_screen("So this is your final board setup.", input_required=False, comp_board=False)
+    display_screen("So this is your final board setup.", comp_board=False)
 
 
 # game_loop and subfunctions
@@ -422,9 +426,9 @@ def turn(user):
       got_input = True
     except Exception as e:
       if user:
-        display_screen(e, input_required=False)
+        display_screen(e)
 
-  display_screen(message, input_required=False)
+  display_screen(message)
 
 def game_loop():
   """
@@ -439,7 +443,7 @@ def game_loop():
 You can start by entering a coordinate, same as you did in the first step
 when placing your ships, to target one of mine.
         
-I'll let you know whether you hit or missed and then take my turn.""", input_required=False)
+I'll let you know whether you hit or missed and then take my turn.""")
   user = True
   while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
     turn(user)
