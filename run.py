@@ -168,10 +168,17 @@ class Board():
             this_point["chains"].append(extendable_chain[0].copy())
             this_point["is_in_chain"] = True
           self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
-          
+
           opposite_point = (row + 1 * directions[direction][0], column + 1 * directions[direction][1])
+
+          perpendicular_directions = [ dir for dir in directions.keys() if dir != direction and dir != direction_complements[direction]]
+
+          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] == opposite_point and chain_end["end"] not in perpendicular_directions]
+          
           while True:
             try:
+              if not 0 <= opposite_point[0] <= 7 or not 0 <= opposite_point[1] <= 7:
+                break
               opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
               self.chain_ends.remove(opposite_chain_end)
               opposite_chain_end["length"] = extendable_chain[0]["length"]
@@ -356,11 +363,11 @@ def computer_choose_target():
   board = boards["user"]
   random_choice = [randint(0,7), randint(0,7)]
 
-  last_target = None
   while True:
     try:
       if len(board.chain_ends) == 0:
-        return random_choice
+        # return random_choice
+        return ( 3, 3 )
       target = board.chain_ends[-1]["point"] + directions[board.chain_ends[-1]["end"]]
       print(target)
       if board.state[(target[0], target[1])]["point"] == "hit" or board.state[(target[0], target[1])]["point"] == "miss":
@@ -422,7 +429,7 @@ def main():
   # display_rules()
   place_ships(user=True)
   # place_ships(user=True, test=True)
-  place_ships(user=False)
+  # place_ships(user=False)
   game_loop()
 
 main()
