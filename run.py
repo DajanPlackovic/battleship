@@ -153,23 +153,24 @@ class Board():
     This info is later used by the computer to decide on its
     next move.
     """
-    row, column = starting_point
-    this_point = self.state[(row, column)]
+    starting_point = np.array(starting_point)
+    this_point = self.state[tuple(starting_point)]
     for direction in directions:
       try:
-       next_point = self.state[(row + 1 * directions[direction][0], column + 1 * directions[direction][1])]
+       next_point = self.state[tuple(starting_point + directions[direction])]
       except:
         continue
       if next_point["is_in_chain"]:
         extendable_chain = [ chain for chain in next_point["chains"] if direction == direction_complements[chain["end"]]]
         if len(extendable_chain):
-          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != (row, column) and chain_end["end"] != direction_complements[direction] ]
+          extendable_chain = extendable_chain[0]
+          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] != tuple(starting_point) and chain_end["end"] != direction_complements[direction] ]
           if new_state == "miss":
             continue
-          opposite_point = (row + extendable_chain[0]["length"] * directions[direction][0], column + extendable_chain[0]["length"] * directions[direction][1])
+          opposite_point = tuple(starting_point + extendable_chain["length"] * directions[direction])
           
-          extendable_chain[0]["length"] += 1
-          this_point["chains"].append(extendable_chain[0].copy())
+          extendable_chain["length"] += 1
+          this_point["chains"].append(extendable_chain.copy())
           this_point["is_in_chain"] = True
 
           perpendicular_directions = [ dir for dir in directions.keys() if dir != direction and dir != direction_complements[direction]]
@@ -185,7 +186,7 @@ class Board():
       shuffle(this_point["chains"])
       this_point["is_in_chain"] = True
 
-    chain_ends_elements = [ { "point": (row, column), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
+    chain_ends_elements = [ { "point": tuple(starting_point), "length": chain["length"], "orientation": chain["orientation"], "end": chain["end"] } for chain in this_point["chains"] if chain["end"] ]
     self.chain_ends.extend(chain_ends_elements)
 
   def check_hit(self, target):
@@ -303,7 +304,7 @@ def parse_input(input):
     return [ int(row[0]) - 1, columns.index(column[0]) ]
   
   except Exception as e:
-    raise ValueError(f"Input not accepted: {e}\n\n⏎\n")
+    raise ValueError(f"Input not accepted: {e}")
 
 def place_ships(user, test=False):
   """
@@ -445,9 +446,9 @@ def main():
 """) # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
   input(" " * 26 + "PRESS ENTER TO BEGIN\n")
   os.system("clear")
-  display_rules()
-  place_ships(user=True)
-  # place_ships(user=True, test=True)
+  # display_rules()
+  # place_ships(user=True)
+  place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
 
