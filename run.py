@@ -170,24 +170,24 @@ class Board():
           this_point["chains"].append(extendable_chain[0].copy())
           this_point["is_in_chain"] = True
 
-          opposite_point = (row + 1 * directions[direction][0], column + 1 * directions[direction][1])
+          opposite_point = (row + next_point["length"] * directions[direction][0], column + next_point["length"] * directions[direction][1])
 
           perpendicular_directions = [ dir for dir in directions.keys() if dir != direction and dir != direction_complements[direction]]
 
-          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] == opposite_point and chain_end["end"] not in perpendicular_directions]
+          self.chain_ends = [ chain_end for chain_end in self.chain_ends if chain_end["point"] == opposite_point and not (chain_end["end"] in perpendicular_directions and chain_end["length"] == 1)]
           
-          while True:
-            try:
-              if not 0 <= opposite_point[0] <= 7 or not 0 <= opposite_point[1] <= 7:
-                break
-              opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
-              self.chain_ends.remove(opposite_chain_end)
-              opposite_chain_end["length"] = extendable_chain[0]["length"]
-              self.chain_ends.insert(-2, opposite_chain_end)
-              break
-            except:
-              new_coordinates = opposite_point + directions[direction]
-              opposite_point = (new_coordinates[0], new_coordinates[1])
+          # while True:
+          #   try:
+          #     if not 0 <= opposite_point[0] <= 7 or not 0 <= opposite_point[1] <= 7:
+          #       break
+          #     opposite_chain_end = next(filter(lambda x: x["point"] == opposite_point and x["end"] == direction, self.chain_ends ))
+          #     self.chain_ends.remove(opposite_chain_end)
+          #     opposite_chain_end["length"] = extendable_chain[0]["length"]
+          #     self.chain_ends.insert(-2, opposite_chain_end)
+          #     break
+          #   except:
+          #     new_coordinates = opposite_point + directions[direction]
+          #     opposite_point = (new_coordinates[0], new_coordinates[1])
 
 
     if not this_point["is_in_chain"] and new_state == "hit":
