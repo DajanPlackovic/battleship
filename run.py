@@ -449,6 +449,7 @@ def main():
   """
   Runs all of the programme functionality.
   """
+  os.system("clear")
   print(r"""
  ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
 /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
