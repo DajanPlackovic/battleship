@@ -336,7 +336,9 @@ OK. Just give me a moment to place my ships as well...
         try:
           if user and not test:
             board.show_directions(starting_square, legitimate_directions, ship)
-          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user and not test else choice(legitimate_directions)
+          chosen_direction = input(f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ⇒\n") if user and not test else choice(legitimate_directions)
+          if chosen_direction.upper() == "R":
+            break
           board.implement_direction(starting_square, chosen_direction, legitimate_directions, ship)
           got_orientation = True
         except Exception as e:
@@ -344,7 +346,8 @@ OK. Just give me a moment to place my ships as well...
             print(e)
           continue
 
-      got_input = True 
+      if got_orientation:
+        got_input = True 
   if user and not test:
     board.display_board()
     input("""
@@ -437,7 +440,7 @@ def main():
   Runs all of the programme functionality.
   """
   # display_rules()
-  # place_ships(user=True)
+  place_ships(user=True)
   place_ships(user=True, test=True)
   place_ships(user=False)
   game_loop()
