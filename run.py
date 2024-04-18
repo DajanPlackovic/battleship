@@ -449,7 +449,7 @@ def main():
  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
 """) # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
-  input("PRESS ENTER TO BEGIN")
+  input(" " * 26 + "PRESS ENTER TO BEGIN\n")
   os.system("clear")
   display_rules()
   place_ships(user=True)
