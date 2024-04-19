@@ -22,7 +22,7 @@ directions = {
     "E": np.array([0, 1])
 }
 
-direction_complements = {
+dir_complements = {
     "N": "S",
     "S": "N",
     "W": "E",
@@ -150,49 +150,57 @@ class Board():
 
         if len(legitimate_directions) == 0:
             raise ValueError(
-                "Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.")
+                "Ship cannot be placed in any orientation from the chosen "
+                "starting position\nwithout overlapping another ship or going"
+                " out of bounds.")
 
         return legitimate_directions
 
-    def show_directions(self, starting_square, legitimate_directions, ship):
+    def show_directions(self, start_square, legit_dirs, ship):
         """
         Displays the available orientations when placing ships.
         """
-        row, column = starting_square
+        start_square = np.array(start_square)
 
-        self.state[(row, column)]["point"] = "ship"
+        self.state[tuple(start_square)]["point"] = "ship"
 
-        for direction in legitimate_directions:
+        for direction in legit_dirs:
             for idx in range(1, ships[ship]):
-                self.state[(row + idx * directions[direction][0], column +
-                            idx * directions[direction][1])]["point"] = "orient"
+                ship_point = tuple(start_square + idx * directions[direction])
+                self.state[ship_point]["point"] = "orient"
 
-    def implement_direction(self, starting_square, direction, legitimate_directions, ship):
+    def implement_direction(self, start_square, direction, legit_dirs, ship):
         """
         Accept direction input if legitimate, throw error if not legitimate.
 
-        Returns True if the choice of starting coordinates should be reset, otherwise None.
+        Returns True if the choice of starting coordinates should be reset,
+        otherwise None.
         """
         direction = direction.upper()
 
         if direction in direction_aliases:
             direction = direction_aliases[direction]
 
-        if not (direction in legitimate_directions or direction == "R"):
+        if not (direction in legit_dirs or direction == "C"):
             raise ValueError(
                 f"{direction} is not one of the possible directions.")
 
-        starting_square = np.array(starting_square)
+        start_square = np.array(start_square)
 
-        self.state = {point: {"point": "unmarked", "chains": [], "is_in_chain": False}
-                      if state["point"] == "orient" else state for point, state in self.state.items()}
+        self.state = {
+            point: {"point": "unmarked",
+                    "chains": [],
+                    "is_in_chain": False
+                    }
+            if state["point"] == "orient" else state
+            for point, state in self.state.items()}
 
-        if direction == "R":
-            self.state[tuple(starting_square)]["point"] = "unmarked"
+        if direction == "C":
+            self.state[tuple(start_square)]["point"] = "unmarked"
             return True
 
         for idx in range(ships[ship]):
-            self.state[tuple(starting_square + idx *
+            self.state[tuple(start_square + idx *
                              directions[direction])]["point"] = "ship"
 
     def update_chains(self, starting_point, new_state):
@@ -209,29 +217,38 @@ class Board():
             try:
                 next_point = self.state[tuple(
                     starting_point + directions[direction])]
-            except:
+            except Exception as e:
                 continue
             if next_point["is_in_chain"]:
                 extendable_chain = [chain for chain in next_point["chains"]
-                                    if direction == direction_complements[chain["end"]]]
+                                    if direction ==
+                                    dir_complements[chain["end"]]]
                 if len(extendable_chain):
                     extendable_chain = extendable_chain[0]
-                    self.chain_ends = [chain_end for chain_end in self.chain_ends if chain_end["point"] != tuple(
-                        starting_point) and chain_end["end"] != direction_complements[direction]]
+                    self.chain_ends = [chain_end for chain_end in
+                                       self.chain_ends if chain_end["point"] !=
+                                       tuple(starting_point) and
+                                       chain_end["end"]
+                                       != dir_complements[direction]]
                     if new_state == "miss":
                         continue
                     opposite_point = tuple(
-                        starting_point + extendable_chain["length"] * directions[direction])
+                        starting_point + extendable_chain["length"] *
+                        directions[direction]
+                    )
 
                     extendable_chain["length"] += 1
                     this_point["chains"].append(extendable_chain.copy())
                     this_point["is_in_chain"] = True
 
                     perpendicular_directions = [dir for dir in directions.keys(
-                    ) if dir != direction and dir != direction_complements[direction]]
+                    ) if dir != direction and
+                        dir != dir_complements[direction]]
 
-                    self.chain_ends = [chain_end for chain_end in self.chain_ends if chain_end["point"] == opposite_point and not (
-                        chain_end["end"] in perpendicular_directions and chain_end["length"] == 1)]
+                    self.chain_ends = [chain_end for chain_end in
+                                       self.chain_ends if chain_end["point"] ==
+                                       opposite_point and not (chain_end["end"]
+                                                               in perpendicular_directions and chain_end["length"] == 1)]
 
         if not this_point["is_in_chain"] and new_state == "hit":
             this_point["chains"].append(
@@ -245,8 +262,14 @@ class Board():
             shuffle(this_point["chains"])
             this_point["is_in_chain"] = True
 
-        chain_ends_elements = [{"point": tuple(starting_point), "length": chain["length"], "orientation": chain["orientation"],
-                                "end": chain["end"]} for chain in this_point["chains"] if chain["end"]]
+        chain_ends_elements = [
+            {
+                "point": tuple(starting_point),
+                "length": chain["length"],
+                "orientation": chain["orientation"],
+                "end": chain["end"]
+            } for chain in this_point["chains"] if chain["end"]
+        ]
         self.chain_ends.extend(chain_ends_elements)
 
     def check_hit(self, target):
@@ -260,21 +283,19 @@ class Board():
         retarget_error = ValueError(
             "You already targeted that spot! Pick another one.\n\n⏎")
 
+        if not self.opponent:
+            target_string = columns[column] + rows[row]
+            display_screen(
+                f"Let's see... I think I'll go for {target_string}.")
+
         target_state = self.state[(row, column)]["point"]
         if target_state == "hit":
             raise retarget_error
         elif target_state == "miss":
             raise retarget_error
         elif target_state == "ship":
-            if not self.opponent:
-                display_screen(
-                    f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
             self.update_point((row, column), "hit")
-
         elif target_state == "unmarked":
-            if not self.opponent:
-                display_screen(
-                    f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
             self.update_point((row, column), "miss")
 
         message = choice(
@@ -291,13 +312,15 @@ boards = {
 }
 
 
-def display_screen(message, input_required=False, comp_board=True, ship_list=None):
+def display_screen(message, req_input=False, comp_d=True, ship_d=None):
     """
     Displays the message instructing the user on the next step,
     an input sign if input is expected and an enter sign in case
     none is and either the user's board or both the computer's and
     the user's board.
     """
+    if ship_d:
+        comp_d = False
     v_separator = "\n" + "=" * 80 + "\n"
     h_separator = " " * 4 + " | " + " " * 4
     padding = 0
@@ -307,20 +330,20 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
     print(v_separator)
 
     user_display = boards['user'].display_board()
-    if comp_board:
+    if comp_d:
         comp_display = boards['computer'].display_board()
 
     for idx in range(8):
         output = '  '.join([str(idx + 1), ' '.join(user_display[idx])])
-        if comp_board or ship_list:
+        if comp_d or ship_d:
             output += h_separator
         padding = 40 - len(output)
-        if comp_board:
+        if comp_d:
             output += '  '.join([str(idx + 1), ' '.join(comp_display[idx])])
-        elif ship_list:
+        elif ship_d:
             if idx in range(2, 7):
-                if ship_list in ship_names:
-                    ship_idx = ship_names.index(ship_list)
+                if ship_d in ship_names:
+                    ship_idx = ship_names.index(ship_d)
                     if idx < ship_idx + 2:
                         checkbox = states["orient"]
                     elif idx == ship_idx + 2:
@@ -329,15 +352,17 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
                         checkbox = states["ship"]
                 else:
                     checkbox = states["ship"]
-                output += f'  {checkbox} {ship_names[idx - 2].capitalize()}' + " " * (
-                    10 - len(ship_names[idx-2])) + f': Length {ships[ship_names[idx - 2]]}'
+                ship = ship_names[idx - 2].capitalize()
+                length = ships[ship_names[idx - 2]]
+                output += f'  {checkbox} {ship}{" " * (10 - len(ship))}'
+                output += f': Length {length}'
         print(" " * padding + output)
 
     output = '   ' + ' '.join([str(letter) for letter in columns])
-    if comp_board or ship_list:
+    if comp_d or ship_d:
         output += h_separator
     padding = 40 - len(output)
-    if comp_board:
+    if comp_d:
         output += '   ' + ' '.join([str(letter) for letter in columns])
 
     print(" " * padding + output)
@@ -346,7 +371,7 @@ def display_screen(message, input_required=False, comp_board=True, ship_list=Non
 
     input_value = None
 
-    if input_required:
+    if req_input:
         input_value = input(f"\n{message}\n\n====>\n")
     else:
         input(f"\n{message}\n\n⏎\n")
@@ -359,18 +384,24 @@ def display_rules():
     """
     Show all the rules at the beginning of the game.
     """
-    display_screen("""Welcome to BATTLESHIP!
+    message = """Welcome to BATTLESHIP!
 
 Whenever you see the symbol at the bottom of this message,
-press enter to continue.""", comp_board=False)
+press enter to continue."""
+    display_screen(message, comp_d=False)
 
-    input_test = display_screen("""Whenever you instead see the arrow below, you will be asked to input something.
+    message = """Whenever you instead see the arrow below, you will be asked
+to input something.
 
-Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
+Type anything in and press Enter. Just don't leave it blank."""
+    input_test = display_screen(message, req_input=True, comp_d=False)
 
     while len(input_test) == 0:
         input_test = display_screen(
-            "See, that's the one thing that won't work. When you see the arrow,\nyou gotta type something.\n\nTry again.", input_required=True, comp_board=False)
+            """See, that's the one thing that won't work. When you see
+the arrow,you gotta type something.
+
+Try again.""", req_input=True, comp_d=False)
 
 
 # place_ships and its subfunctions
@@ -384,23 +415,48 @@ def parse_input(input):
     try:
         if (len(processed_input) > 2):
             raise ValueError(
-                f"Input can contain only two characters (a letter A-H and a number 1-8) and spaces.\nInput contains {len(processed_input)} characters.")
+                "Input can contain only two characters (a letter A-H and "
+                "a number 1-8) and spaces.\n"
+                f"Input contains {len(processed_input)} characters.")
 
         column = findall(f"[{''.join(columns)}]", input.upper())
 
         if len(column) < 1:
             raise ValueError(
-                f"Input string should contain exactly one reference\nto a column (a letter from A to H or a to h).\n")
+                "Input string should contain exactly one reference\n"
+                "to a column (a letter from A to H or a to h).\n")
 
         row = findall(f"[{''.join(rows)}]", input)
         if len(row) < 1:
             raise ValueError(
-                f"Input string should contain exactly one reference\nto a row (a number from 1 to 8).\n")
+                f"Input string should contain exactly one reference\n"
+                "to a row (a number from 1 to 8).\n")
 
         return [int(row[0]) - 1, columns.index(column[0])]
 
     except Exception as e:
         raise ValueError(f"Input not accepted: {e}")
+
+
+def dir_select(legit_dirs):
+    message = """Choose the orientation of the ship by
+entering the first letter of a valid direction.
+
+Enter [C] to reenter the starting [C]oordinate.\n"""
+    if "N" in legit_dirs:
+        message += f'{" " * 10}[U]p ↑ [N]orth'
+    message += "\n"
+    if "W" in legit_dirs:
+        message += f'[L]eft ← [W]est'
+    else:
+        message += " " * 15
+    if "E" in legit_dirs:
+        message += f'{" " * 2}[R]ight → [E]ast'
+    message += "\n"
+    if "S" in legit_dirs:
+        message += f'{" " * 8}[D]own ↓ [S]outh'
+
+    return message
 
 
 def place_ships(user, test=False):
@@ -415,34 +471,45 @@ def place_ships(user, test=False):
 
     if user and not test:
         display_screen(
-            """Start by placing your ships. You can do so by first entering a point
-on the board (e.g. A2) and then choosing an orientation (N, E, S, W).
+            """Start by placing your ships. You can do so by first entering
+a point on the board (e.g. A2) and then choosing an orientation.
 
 The ship name and length will be shown before you are asked to
-place it.""", comp_board=False)
-        display_screen("You will be asked to place the five ships you see above on your board.",
-                       comp_board=False, ship_list=True)
-        display_screen("The ships may not overlap, nor may they be placed\npartially outside the board.",
-                       comp_board=False, ship_list=True)
+place it.""", comp_d=False)
+        message = """
+You will be asked to place the five ships you see above on your board.
+
+The ships may not overlap, nor may they be placed\npartially outside the board.
+"""
+        display_screen(message,
+                       comp_d=False, ship_d=True)
     if not user and not test:
         display_screen(
-            """OK. Just give me a moment to place my ships as well...""", comp_board=True)
+            """OK. Just give me a moment to place my ships as well...""",
+            comp_d=True)
 
     for ship in ships:
         got_input = False
         while not (got_input):
             if user and not test:
                 board.display_board()
-            starting_square = display_screen(f"Place the {ship.capitalize()}: Length {ships[ship]}\n\nYou can do so by entering a column (A-H) and\na row (1-8) in any order.",
-                                             input_required=True, comp_board=False, ship_list=ship) if user and not test else [randint(0, 7), randint(0, 7)]
+                message = f"Place the {ship.capitalize()}:"
+                message += f"Length {ships[ship]}\n\n"
+                message += """You can do so by entering a column (A-H) and
+a row (1-8) in any order."""
+                start_square = display_screen(
+                    message, req_input=True, ship_d=ship
+                )
+            else:
+                start_square = [randint(0, 7), randint(0, 7)]
             try:
                 if user and not test:
-                    starting_square = parse_input(starting_square)
-                legitimate_directions = board.find_legitimate_directions(
-                    starting_square, ship)
+                    start_square = parse_input(start_square)
+                legit_dirs = board.find_legitimate_directions(
+                    start_square, ship)
             except Exception as e:
                 if user and not test:
-                    display_screen(e, comp_board=False, ship_list=ship)
+                    display_screen(e, comp_d=False, ship_d=ship)
                 continue
 
             got_orientation = False
@@ -450,23 +517,27 @@ place it.""", comp_board=False)
                 try:
                     if user and not test:
                         board.show_directions(
-                            starting_square, legitimate_directions, ship)
-                    chosen_direction = display_screen(
-                        f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
+                            start_square, legit_dirs, ship)
+                        chosen_dir = display_screen(
+                            dir_select(legit_dirs),
+                            req_input=True, comp_d=False, ship_d=ship
+                        )
+                    else:
+                        chosen_dir = choice(legit_dirs)
                     reset = board.implement_direction(
-                        starting_square, chosen_direction, legitimate_directions, ship)
+                        start_square, chosen_dir, legit_dirs, ship)
                     if reset:
                         break
                     got_orientation = True
                 except Exception as e:
                     if user and not test:
-                        display_screen(e, comp_board=False, ship_list=ship)
+                        display_screen(e, comp_d=False, ship_d=ship)
                     continue
 
             if got_orientation:
                 got_input = True
     if user and not test:
-        display_screen("So this is your final board setup.", comp_board=False)
+        display_screen("So this is your final board setup.", comp_d=False)
 
 
 # game_loop and subfunctions
@@ -486,10 +557,10 @@ def computer_choose_target():
                 # return ( 3, 3 )
             target = board.chain_ends[-1]["point"] + \
                 directions[board.chain_ends[-1]["end"]]
-            if board.state[(target[0], target[1])]["point"] == "hit" or board.state[(target[0], target[1])]["point"] == "miss":
+            if board.state[(target[0], target[1])]["point"] in ["hit", "miss"]:
                 raise ValueError("retry")
             break
-        except:
+        except Exception as e:
             board.chain_ends = board.chain_ends[:-1]
 
     return (target[0], target[1])
@@ -510,8 +581,11 @@ def turn(user):
 
     got_input = False
     while not got_input:
-        target = display_screen("Enter a field you would like to target.",
-                                input_required=True) if user else computer_choose_target()
+        if user:
+            target = display_screen("Enter a field you would like to target.",
+                                    req_input=True)
+        else:
+            target = computer_choose_target()
         try:
             if user:
                 target = parse_input(target)
@@ -579,24 +653,25 @@ def main():
     """
     Runs all of the programme functionality.
     """
-#     os.system("clear")
-#     while True:
-#         print(r"""
-#  ______  ______  ______  ______  __      ______  ______  __  __  __  ______
-# /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \
-# \ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/
-#  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\
-#   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/
-# """)  # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
-#         input(" " * 26 + "PRESS ENTER TO BEGIN\n")
-#         os.system("clear")
-#         display_rules()
-#         while True:
-#             place_ships(user=True)
-    place_ships(user=True, test=True)
-    place_ships(user=False)
-    user_lost = game_loop()
-    victory_screen(user_lost)
+    os.system("clear")
+    while True:
+        print(r"""
+ ______  ______  ______  ______  __      ______  ______  __  __  __  ______
+/\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \
+\ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/
+ \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\
+  \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/
+""")
+# taken from https: // patorjk.com/software/taag/
+        input(" " * 26 + "PRESS ENTER TO BEGIN\n")
+        os.system("clear")
+        # display_rules()
+        while True:
+            place_ships(user=True)
+            place_ships(user=True, test=True)
+            place_ships(user=False)
+            user_lost = game_loop()
+            victory_screen(user_lost)
 
 
 main()
