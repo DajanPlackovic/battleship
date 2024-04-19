@@ -83,9 +83,9 @@ rows = [str(num) for num in range(1, 9)]
 
 class Board():
     """
-    Initalizes a board:
+    Initializes a board:
 
-    A dictionary with coordinate tuplets as keys, field states as values
+    A dictionary with coordinate tuples as keys, field states as values
     and methods that allow actions upon the board.
     """
 
@@ -226,7 +226,8 @@ class Board():
                 if len(extendable_chain):
                     extendable_chain = extendable_chain[0]
                     self.chain_ends = [chain_end for chain_end in
-                                       self.chain_ends if chain_end["point"] !=
+                                       self.chain_ends
+                                       if chain_end["point"] !=
                                        tuple(starting_point) and
                                        chain_end["end"]
                                        != dir_complements[direction]]
@@ -241,14 +242,18 @@ class Board():
                     this_point["chains"].append(extendable_chain.copy())
                     this_point["is_in_chain"] = True
 
-                    perpendicular_directions = [dir for dir in directions.keys(
+                    perp_dirs = [dir for dir in directions.keys(
                     ) if dir != direction and
                         dir != dir_complements[direction]]
 
-                    self.chain_ends = [chain_end for chain_end in
-                                       self.chain_ends if chain_end["point"] ==
-                                       opposite_point and not (chain_end["end"]
-                                                               in perpendicular_directions and chain_end["length"] == 1)]
+                    self.chain_ends = [ce for ce in
+                                       self.chain_ends if ce["point"] ==
+                                       opposite_point and not (ce["end"]
+                                                               in perp_dirs
+                                                               and
+                                                               ce["length"] ==
+                                                               1)
+                                       ]
 
         if not this_point["is_in_chain"] and new_state == "hit":
             this_point["chains"].append(
@@ -442,7 +447,7 @@ def dir_select(legit_dirs):
     message = """Choose the orientation of the ship by
 entering the first letter of a valid direction.
 
-Enter [C] to reenter the starting [C]oordinate.\n"""
+Enter [C] to re-enter the starting [C]oordinate.\n"""
     if "N" in legit_dirs:
         message += f'{" " * 10}[U]p ↑ [N]orth'
     message += "\n"
@@ -662,7 +667,7 @@ def main():
  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\
   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/
 """)
-# taken from https: // patorjk.com/software/taag/
+# taken from https://patorjk.com/software/taag/
         input(" " * 26 + "PRESS ENTER TO BEGIN\n")
         os.system("clear")
         # display_rules()
