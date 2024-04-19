@@ -225,14 +225,9 @@ class Board():
                                     dir_complements[chain["end"]]]
                 if len(extendable_chain):
                     extendable_chain = extendable_chain[0]
-                    self.chain_ends = [chain_end for chain_end in
-                                       self.chain_ends
-                                       if chain_end["point"] !=
-                                       tuple(starting_point) and
-                                       chain_end["end"]
-                                       != dir_complements[direction]]
                     if new_state == "miss":
                         continue
+
                     opposite_point = tuple(
                         starting_point + extendable_chain["length"] *
                         directions[direction]
@@ -256,14 +251,12 @@ class Board():
                                        ]
 
         if not this_point["is_in_chain"] and new_state == "hit":
-            this_point["chains"].append(
-                {"orientation": "NS", "length": 1, "end": "N"})
-            this_point["chains"].append(
-                {"orientation": "NS", "length": 1, "end": "S"})
-            this_point["chains"].append(
-                {"orientation": "WE", "length": 1, "end": "W"})
-            this_point["chains"].append(
-                {"orientation": "WE", "length": 1, "end": "E"})
+            this_point["chains"] = [
+                {"orientation": "NS", "length": 1, "end": "N"},
+                {"orientation": "NS", "length": 1, "end": "S"},
+                {"orientation": "WE", "length": 1, "end": "W"},
+                {"orientation": "WE", "length": 1, "end": "E"}
+            ]
             shuffle(this_point["chains"])
             this_point["is_in_chain"] = True
 
