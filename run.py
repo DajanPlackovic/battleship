@@ -36,6 +36,39 @@ direction_aliases = bidict({
     "R": "E"
 })
 
+messages = {
+    True: {
+        "ship": [
+            "Uff! That one hurt!",
+            "Yikes! Right in my ship!",
+            "Ouch! Hope that wasn't my last one...",
+            "Well, that one fought bravely...\nSunk bravely too..."
+        ],
+        "unmarked": [
+            "Not even close! :)",
+            "Miles off! Wrong ocean, even!",
+            "You're making waves!\nOnly in the water, unfortunately. ;)",
+            "Better luck next time.\nWait, why would I want that for you..."
+        ],
+        "previous": ""
+    },
+    False: {
+        "ship": [
+            "Yesss! Gotcha!",
+            "Knew it! One down!",
+            "So that's where you're hiding...",
+            "Almost beat you.\nWait, is that right? I forgot to count."
+        ],
+        "unmarked": [
+            "Oh, nothing there! Well, that's a bummer.",
+            "Damn! Missed completely.",
+            "Uff, gotta focus.",
+            "Aha. So no ship there... Hmmm..."
+        ],
+        "previous": ""
+    }
+}
+
 states = {
     "ship": "■",
     "orient": "□",
@@ -227,24 +260,27 @@ class Board():
         retarget_error = ValueError(
             "You already targeted that spot! Pick another one.\n\n⏎")
 
-        if self.state[(row, column)]["point"] == "hit":
+        target_state = self.state[(row, column)]["point"]
+        if target_state == "hit":
             raise retarget_error
-        elif self.state[(row, column)]["point"] == "miss":
+        elif target_state == "miss":
             raise retarget_error
-        elif self.state[(row, column)]["point"] == "ship":
+        elif target_state == "ship":
             if not self.opponent:
                 display_screen(
                     f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
             self.update_point((row, column), "hit")
 
-            message = "Nice! You got one!" if self.opponent else "Nice! I got you!"
-        elif self.state[(row, column)]["point"] == "unmarked":
+        elif target_state == "unmarked":
             if not self.opponent:
                 display_screen(
                     f"Let's see... I think I'll go for {columns[column] + rows[row]}.")
             self.update_point((row, column), "miss")
 
-            message = "Yikes! Better luck next time..." if self.opponent else "Damn! I'm sure I was close."
+        message = choice(
+            [text for text in messages[self.opponent][target_state]
+                if text != messages[self.opponent]["previous"]])
+        messages[self.opponent]["previous"] = message
 
         return message
 
@@ -324,12 +360,12 @@ def display_rules():
     Show all the rules at the beginning of the game.
     """
     display_screen("""Welcome to BATTLESHIP!
-        
+
 Whenever you see the symbol at the bottom of this message,
 press enter to continue.""", comp_board=False)
 
     input_test = display_screen("""Whenever you instead see the arrow below, you will be asked to input something.
-        
+
 Type anything in and press Enter. Just don't leave it blank.""", input_required=True, comp_board=False)
 
     while len(input_test) == 0:
@@ -495,20 +531,20 @@ def victory_screen(user_lost):
     """
     if user_lost:
         print(r"""
- __  __     ______     __  __        __         ______     ______     ______  
-/\ \_\ \   /\  __ \   /\ \/\ \      /\ \       /\  __ \   /\  ___\   /\__  _\ 
-\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \____  \ \ \/\ \  \ \___  \  \/_/\ \/ 
- \/\_____\  \ \_____\  \ \_____\     \ \_____\  \ \_____\  \/\_____\    \ \_\ 
-  \/_____/   \/_____/   \/_____/      \/_____/   \/_____/   \/_____/     \/_/ 
+ __  __     ______     __  __        __         ______     ______     ______
+/\ \_\ \   /\  __ \   /\ \/\ \      /\ \       /\  __ \   /\  ___\   /\__  _\
+\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \____  \ \ \/\ \  \ \___  \  \/_/\ \/
+ \/\_____\  \ \_____\  \ \_____\     \ \_____\  \ \_____\  \/\_____\    \ \_\
+  \/_____/   \/_____/   \/_____/      \/_____/   \/_____/   \/_____/     \/_/
 """)
         message = "Maybe you'll have better luck next time."
     else:
         print(r"""
- __  __     ______     __  __        __     __     ______     __   __    
-/\ \_\ \   /\  __ \   /\ \/\ \      /\ \  _ \ \   /\  __ \   /\ "-.\ \   
-\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \/ ".\ \  \ \ \/\ \  \ \ \-.  \  
- \/\_____\  \ \_____\  \ \_____\     \ \__/".~\_\  \ \_____\  \ \_\\"\_\ 
-  \/_____/   \/_____/   \/_____/      \/_/   \/_/   \/_____/   \/_/ \/_/                                                                       
+ __  __     ______     __  __        __     __     ______     __   __
+/\ \_\ \   /\  __ \   /\ \/\ \      /\ \  _ \ \   /\  __ \   /\ "-.\ \
+\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \/ ".\ \  \ \ \/\ \  \ \ \-.  \
+ \/\_____\  \ \_____\  \ \_____\     \ \__/".~\_\  \ \_____\  \ \_\\"\_\
+  \/_____/   \/_____/   \/_____/      \/_/   \/_/   \/_____/   \/_/ \/_/
 """)
         message = "Wanna beat the computer again?"
 
@@ -527,10 +563,10 @@ def game_loop():
     """
 
     display_screen("""Let's play!
-        
+
 You can start by entering a coordinate, same as you did in the first step
 when placing your ships, to target one of mine.
-        
+
 I'll let you know whether you hit or missed and then take my turn.""")
     user = True
     while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
@@ -543,24 +579,24 @@ def main():
     """
     Runs all of the programme functionality.
     """
-    os.system("clear")
-    while True:
-        print(r"""
- ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
-/\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
-\ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/ 
- \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
-  \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
-""")  # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
-        input(" " * 26 + "PRESS ENTER TO BEGIN\n")
-        os.system("clear")
-        display_rules()
-        while True:
-            place_ships(user=True)
-            # place_ships(user=True, test=True)
-            place_ships(user=False)
-            user_lost = game_loop()
-            victory_screen(user_lost)
+#     os.system("clear")
+#     while True:
+#         print(r"""
+#  ______  ______  ______  ______  __      ______  ______  __  __  __  ______
+# /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \
+# \ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/
+#  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\
+#   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/
+# """)  # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
+#         input(" " * 26 + "PRESS ENTER TO BEGIN\n")
+#         os.system("clear")
+#         display_rules()
+#         while True:
+#             place_ships(user=True)
+    place_ships(user=True, test=True)
+    place_ships(user=False)
+    user_lost = game_loop()
+    victory_screen(user_lost)
 
 
 main()
