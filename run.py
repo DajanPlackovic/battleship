@@ -42,7 +42,7 @@ messages = {
             "Uff! That one hurt!",
             "Yikes! Right in my ship!",
             "Ouch! Hope that wasn't my last one...",
-            "Well, that one fought bravely...\nSunk bravely too..."
+            "Well, that one fought bravely...\nSank bravely too..."
         ],
         "unmarked": [
             "Not even close! :)",
@@ -288,20 +288,18 @@ class Board():
         retarget_error = ValueError(
             "You already targeted that spot! Pick another one.\n\n⏎")
 
-        if not self.opponent:
-            target_string = columns[column] + rows[row]
-            display_screen(
-                f"Let's see... I think I'll go for {target_string}.")
-
         target_state = self.state[(row, column)]["point"]
-        if target_state == "hit":
+        if target_state in ["hit", "miss"]:
             raise retarget_error
-        elif target_state == "miss":
-            raise retarget_error
-        elif target_state == "ship":
-            self.update_point((row, column), "hit")
-        elif target_state == "unmarked":
-            self.update_point((row, column), "miss")
+        else:
+            if not self.opponent:
+                target_string = columns[column] + rows[row]
+                display_screen(
+                    f"Let's see... I think I'll go for {target_string}.")
+            if target_state == "ship":
+                self.update_point((row, column), "hit")
+            elif target_state == "unmarked":
+                self.update_point((row, column), "miss")
 
         message = choice(
             [text for text in messages[self.opponent][target_state]
@@ -580,7 +578,6 @@ def computer_choose_target():
         try:
             if len(board.chain_ends) == 0:
                 return random_choice
-                # return ( 3, 3 )
             target = board.chain_ends[-1]["point"] + \
                 directions[board.chain_ends[-1]["end"]]
             if board.state[(target[0], target[1])]["point"] in ["hit", "miss"]:
