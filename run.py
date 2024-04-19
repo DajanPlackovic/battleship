@@ -1,7 +1,7 @@
 # Your code goes here.
 # You can delete these comments, but do not change the name of this file
 # Write your code to expect a terminal of 80 characters wide and 24 rows high
-from re import findall
+from re import findall, sub
 from random import randint, choice, shuffle
 import numpy as np
 import os
@@ -448,7 +448,7 @@ def parse_input(input):
     If the input is not valid, returns a ValueError.
     """
     # ensures trailing spaces and spaces between characters are tolerated
-    processed_input = input.strip().replace(" ", "")
+    processed_input = sub(r"\s+", "", input)
 
     try:
         if (len(processed_input) > 2):
