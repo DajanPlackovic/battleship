@@ -276,7 +276,7 @@ class Board():
                                        ce["end"] not in perp_dirs
                                        ]
 
-        # if no extendable chains are found, create for chains in all
+        # if no extendable chains are found, create four chains in all
         # directions around the point we hit
 
         # the computer will keep targeting around it until it hits another
@@ -641,7 +641,7 @@ def computer_choose_target():
             # otherwise stop
             break
         except Exception as e:
-            # if you retargeted, remove the last chain we tried ( the one that
+            # if you retargeted, remove the last chain we tried (the one that
             # led to the error) and try again
             board.chain_ends = board.chain_ends[:-1]
 
