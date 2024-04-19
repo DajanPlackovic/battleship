@@ -488,12 +488,12 @@ def turn(user):
     display_screen(message)
 
 
-def victory_screen(user_won):
+def victory_screen(user_lost):
     """
     Displays a victory or loss screen depending on the outcome of the game
     and prompts the user to restart the game.
     """
-    if user_won:
+    if user_lost:
         print(r"""
  __  __     ______     __  __        __         ______     ______     ______  
 /\ \_\ \   /\  __ \   /\ \/\ \      /\ \       /\  __ \   /\  ___\   /\__  _\ 
