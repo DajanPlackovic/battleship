@@ -326,7 +326,7 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
     """
     if ship_d:
         comp_d = False
-    v_separator = "\n" + "=" * 82 + "\n"
+    v_separator = "\n" + "=" * 80 + "\n"
     h_separator = " " * 4 + " | " + " " * 4
     padding = 0
 
