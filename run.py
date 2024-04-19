@@ -332,7 +332,7 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
 
     ship_names = [name for name in ships.keys()]
 
-    print(v_separator)
+    # print(v_separator)
 
     user_display = boards['user'].display_board()
     if comp_d:
