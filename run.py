@@ -511,7 +511,8 @@ a row (1-8) in any order."""
                 if user and not test:
                     start_square = parse_input(start_square)
                 legit_dirs = board.find_legitimate_directions(
-                    start_square, ship)
+                    start_square, ship
+                )
             except Exception as e:
                 if user and not test:
                     display_screen(e, comp_d=False, ship_d=ship)
@@ -670,10 +671,10 @@ def main():
 # taken from https://patorjk.com/software/taag/
         input(" " * 26 + "PRESS ENTER TO BEGIN\n")
         os.system("clear")
-        # display_rules()
+        display_rules()
         while True:
             place_ships(user=True)
-            place_ships(user=True, test=True)
+            # place_ships(user=True, test=True)
             place_ships(user=False)
             user_lost = game_loop()
             victory_screen(user_lost)
