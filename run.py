@@ -326,13 +326,13 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
     """
     if ship_d:
         comp_d = False
-    v_separator = "\n" + "=" * 80 + "\n"
+    v_separator = "\n" + "=" * 82 + "\n"
     h_separator = " " * 4 + " | " + " " * 4
     padding = 0
 
     ship_names = [name for name in ships.keys()]
 
-    print()
+    print(v_separator)
 
     user_display = boards['user'].display_board()
     if comp_d:
@@ -444,22 +444,42 @@ def parse_input(input):
 
 
 def dir_select(legit_dirs):
-    message = """Choose the orientation of the ship by
-entering the first letter of a valid direction.
+    message = ""
 
-Enter [C] to re-enter the starting [C]oordinate.\n"""
+    line = "Choose the orientation of the ship by"
+    line += (50 - len(line)) * " " + "| "
     if "N" in legit_dirs:
-        message += f'{" " * 10}[U]p ↑ [N]orth'
-    message += "\n"
+        line += f'{" " * 10}[U]p ↑ [N]orth'
+    line += "\n"
+
+    message += line
+
+    line = "entering the first letter of a valid direction."
+    line += (50 - len(line)) * " " + "| "
+    line += "\n"
+
+    message += line
+
+    line = "Each direction has two alternative designations."
+    line += (50 - len(line)) * " " + "| "
+
     if "W" in legit_dirs:
-        message += f'[L]eft ← [W]est'
+        line += f'[L]|[W] ←'
     else:
-        message += " " * 15
+        line += " " * 15
     if "E" in legit_dirs:
-        message += f'{" " * 2}[R]ight → [E]ast'
-    message += "\n"
+        line += f' → [R]|[E]'
+    line += "\n"
+
+    message += line
+
+    message += " " * 50 + "|" "\n"
+
+    line = "Enter [C] to re-enter the starting [C]oordinate."
+    line += (50 - len(line)) * " " + "| "
     if "S" in legit_dirs:
-        message += f'{" " * 8}[D]own ↓ [S]outh'
+        line += f'{" " * 8}[D]own ↓ [S]outh'
+    message += line
 
     return message
 
