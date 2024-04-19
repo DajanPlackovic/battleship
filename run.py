@@ -117,7 +117,7 @@ class Board():
 
         if len(legitimate_directions) == 0:
             raise ValueError(
-                "Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.\n\n⏎")
+                "Ship cannot be placed in any orientation from the chosen starting position\nwithout overlapping another ship or going out of bounds.")
 
         return legitimate_directions
 
@@ -416,7 +416,7 @@ place it.""", comp_board=False)
                         board.show_directions(
                             starting_square, legitimate_directions, ship)
                     chosen_direction = display_screen(
-                        f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
+                        "Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
                     reset = board.implement_direction(
                         starting_square, chosen_direction, legitimate_directions, ship)
                     if reset:
