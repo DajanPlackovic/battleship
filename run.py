@@ -332,7 +332,7 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
 
     ship_names = [name for name in ships.keys()]
 
-    print(v_separator)
+    print("\n")
 
     user_display = boards['user'].display_board()
     if comp_d:
@@ -350,11 +350,11 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
                 if ship_d in ship_names:
                     ship_idx = ship_names.index(ship_d)
                     if idx < ship_idx + 2:
-                        checkbox = states["orient"]
+                        checkbox = states["ship"]
                     elif idx == ship_idx + 2:
                         checkbox = "☒"
                     else:
-                        checkbox = states["ship"]
+                        checkbox = states["orient"]
                 else:
                     checkbox = states["ship"]
                 ship = ship_names[idx - 2].capitalize()
@@ -518,7 +518,7 @@ The ships may not overlap, nor may they be placed\npartially outside the board.
         while not (got_input):
             if user and not test:
                 board.display_board()
-                message = f"Place the {ship.capitalize()}:"
+                message = f"Place the {ship.capitalize()}: "
                 message += f"Length {ships[ship]}\n\n"
                 message += """You can do so by entering a column (A-H) and
 a row (1-8) in any order."""
