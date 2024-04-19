@@ -1,4 +1,6 @@
 asarPy==1.0.1
+autopep8==2.1.0
+bidict==0.23.1
 cachetools==5.3.3
 certifi==2024.2.2
 charset-normalizer==3.3.2
@@ -15,6 +17,7 @@ numpy==1.26.4
 oauthlib==3.2.2
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
+pycodestyle==2.11.1
 Pygments==2.17.2
 requests==2.31.0
 requests-oauthlib==2.0.0

@@ -5,6 +5,7 @@ from re import findall
 from random import randint, choice, shuffle
 import numpy as np
 import os
+from bidict import bidict
 
 ships = {
     "carrier": 5,
@@ -27,6 +28,13 @@ direction_complements = {
     "W": "E",
     "E": "W"
 }
+
+direction_aliases = bidict({
+    "U": "N",
+    "D": "S",
+    "L": "W",
+    "R": "E"
+})
 
 states = {
     "ship": "■",
@@ -133,6 +141,9 @@ class Board():
         Returns True if the choice of starting coordinates should be reset, otherwise None.
         """
         direction = direction.upper()
+
+        if direction in direction_aliases:
+            direction = direction_aliases[direction]
 
         if not (direction in legitimate_directions or direction == "R"):
             raise ValueError(
@@ -405,7 +416,7 @@ place it.""", comp_board=False)
                         board.show_directions(
                             starting_square, legitimate_directions, ship)
                     chosen_direction = display_screen(
-                        f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)}", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
+                        f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
                     reset = board.implement_direction(
                         starting_square, chosen_direction, legitimate_directions, ship)
                     if reset:
