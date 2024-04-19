@@ -416,7 +416,7 @@ place it.""", comp_board=False)
                         board.show_directions(
                             starting_square, legitimate_directions, ship)
                     chosen_direction = display_screen(
-                        "Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
+                        f"Choose the orientation of the ship: [N]orth, [E]ast, [S]outh or [W]est.\nYou may also use [U]p, [D]own, [L]eft and [R]ight.\nEnter [R] to [R]eenter the starting coordinate.\n\nBased on the starting position, the following orientations are possible:\n{', '.join(legitimate_directions)} ({', '.join([direction_aliases.inverse[dir] for dir in legitimate_directions ])})", input_required=True, comp_board=False, ship_list=ship) if user and not test else choice(legitimate_directions)
                     reset = board.implement_direction(
                         starting_square, chosen_direction, legitimate_directions, ship)
                     if reset:
@@ -488,6 +488,36 @@ def turn(user):
     display_screen(message)
 
 
+def victory_screen(user_won):
+    """
+    Displays a victory or loss screen depending on the outcome of the game
+    and prompts the user to restart the game.
+    """
+    if user_won:
+        print(r"""
+ __  __     ______     __  __        __         ______     ______     ______  
+/\ \_\ \   /\  __ \   /\ \/\ \      /\ \       /\  __ \   /\  ___\   /\__  _\ 
+\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \____  \ \ \/\ \  \ \___  \  \/_/\ \/ 
+ \/\_____\  \ \_____\  \ \_____\     \ \_____\  \ \_____\  \/\_____\    \ \_\ 
+  \/_____/   \/_____/   \/_____/      \/_____/   \/_____/   \/_____/     \/_/ 
+""")
+        message = "Maybe you'll have better luck next time."
+    else:
+        print(r"""
+ __  __     ______     __  __        __     __     ______     __   __    
+/\ \_\ \   /\  __ \   /\ \/\ \      /\ \  _ \ \   /\  __ \   /\ "-.\ \   
+\ \____ \  \ \ \/\ \  \ \ \_\ \     \ \ \/ ".\ \  \ \ \/\ \  \ \ \-.  \  
+ \/\_____\  \ \_____\  \ \_____\     \ \__/".~\_\  \ \_____\  \ \_\\"\_\ 
+  \/_____/   \/_____/   \/_____/      \/_/   \/_/   \/_____/   \/_/ \/_/                                                                       
+""")
+        message = "Wanna beat the computer again?"
+
+    print(" " * (40 - len(message) // 2) + message)
+    print(" " * 27 + "PRESS ENTER TO PLAY AGAIN")
+    input()
+    os.system("clear")
+
+
 def game_loop():
     """
     Runs the main game loop.
@@ -506,6 +536,7 @@ I'll let you know whether you hit or missed and then take my turn.""")
     while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
         turn(user)
         user = not user
+    return user
 
 
 def main():
@@ -513,20 +544,23 @@ def main():
     Runs all of the programme functionality.
     """
     os.system("clear")
-    print(r"""
+    while True:
+        print(r"""
  ______  ______  ______  ______  __      ______  ______  __  __  __  ______  
 /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \ 
 \ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/ 
  \ \_____\ \_\ \_\ \ \_\   \ \_\ \ \_____\ \_____\/\_____\ \_\ \_\ \_\ \_\   
   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/                                                                                                    
 """)  # from https://patorjk.com/software/taag/#p=display&f=Sub-Zero&t=battleship
-    input(" " * 26 + "PRESS ENTER TO BEGIN\n")
-    os.system("clear")
-    display_rules()
-    place_ships(user=True)
-    # place_ships(user=True, test=True)
-    place_ships(user=False)
-    game_loop()
+        input(" " * 26 + "PRESS ENTER TO BEGIN\n")
+        os.system("clear")
+        display_rules()
+        while True:
+            place_ships(user=True)
+            # place_ships(user=True, test=True)
+            place_ships(user=False)
+            user_lost = game_loop()
+            victory_screen(user_lost)
 
 
 main()
