@@ -723,9 +723,10 @@ when placing your ships, to target one of mine.
 
 I'll let you know whether you hit or missed and then take my turn.""")
     user = True
+    user = False
     while boards["computer"].ship_count > 0 and boards["user"].ship_count > 0:
         turn(user)
-        user = not user
+        # user = not user
     return user
 
 
@@ -734,8 +735,7 @@ def main():
     Runs all of the programme functionality.
     """
     os.system("clear")
-    while True:
-        print(r"""
+    print(r"""
  ______  ______  ______  ______  __      ______  ______  __  __  __  ______
 /\  == \/\  __ \/\__  _\/\__  _\/\ \    /\  ___\/\  ___\/\ \_\ \/\ \/\  == \
 \ \  __<\ \  __ \/_/\ \/\/_/\ \/\ \ \___\ \  __\\ \___  \ \  __ \ \ \ \  _-/
@@ -743,14 +743,18 @@ def main():
   \/_____/\/_/\/_/  \/_/    \/_/  \/_____/\/_____/\/_____/\/_/\/_/\/_/\/_/
 """)
 # taken from https://patorjk.com/software/taag/
-        input(" " * 26 + "PRESS ENTER TO BEGIN\n")
-        os.system("clear")
-        display_rules()
-        while True:
-            place_ships(user=True)
-            place_ships(user=False)
-            user_lost = game_loop()
-            victory_screen(user_lost)
+    input(" " * 26 + "PRESS ENTER TO BEGIN\n")
+    os.system("clear")
+    display_rules()
+    while True:
+        # reset boards
+        boards["computer"] = Board(user=False)
+        boards["user"] = Board()
+
+        place_ships(user=True)
+        place_ships(user=False)
+        user_lost = game_loop()
+        victory_screen(user_lost)
 
 
 main()
