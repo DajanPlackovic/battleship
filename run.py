@@ -453,7 +453,7 @@ def parse_input(input):
     try:
         if (len(processed_input) > 2):
             raise ValueError(
-                "Input can contain only two characters (a letter A-H and "
+                "Input can contain only two characters (a letter A-H and\n"
                 "a number 1-8) and spaces.\n"
                 f"Input contains {len(processed_input)} characters.")
 
