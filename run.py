@@ -413,6 +413,7 @@ def display_screen(message, req_input=False, comp_d=True, ship_d=None):
         input(f"\n{message}\n\n⏎\n")
 
     os.system("clear")
+    os.system("clear")
     return input_value
 
 
